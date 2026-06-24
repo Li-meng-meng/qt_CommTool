@@ -1,0 +1,15 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+    <file>View/MainView.qml</file>
+    <file>View/SideBarView.qml</file>
+    <file>View/DataShowView.qml</file>
+    <file>View/DataPlotView.qml</file>
+    <file>View/SettingView.qml</file>
+    <file>View/HelpView.qml</file>
+    <file>View/CommonToolView/SerialSettingView.qml</file>
+    <file>View/Component/LineChartWidget.qml</file>
+    <file>View/Component/Button.qml</file>
+    <file>View/Theme/ColorTheme.qml</file>
+    <file>View/Theme/Toast.qml</file>
+</qresource>
+</RCC>
