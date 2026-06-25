@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QByteArray>
 #include <QStringList>
+#include <QQmlEngine>
 #include "../CommModelLib/SerialPort/SerialService.h"
 #include "../CommModelLib/Common/EnumComm.h"
 #include "DataParser.h"
@@ -12,6 +13,7 @@
 class CommViewModel : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(QString portName READ getPortName WRITE setPortName NOTIFY portNameChanged)
     Q_PROPERTY(int baudRate READ getBaudRate WRITE setBaudRate NOTIFY baudRateChanged)
     Q_PROPERTY(int dataBits READ getDataBits WRITE setDataBits NOTIFY dataBitsChanged)

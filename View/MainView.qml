@@ -56,10 +56,12 @@ Window {
             onSwitchToDataPlot: {
                 root.currentPage = 1
                 commViewModel.isPlotViewActive = true
+                commViewModel.dataPlotViewModel.isViewActive = true
             }
             onSwitchToSerial: {
                 root.currentPage = 0
                 commViewModel.isPlotViewActive = false
+                commViewModel.dataPlotViewModel.isViewActive = false
             }
         }
 

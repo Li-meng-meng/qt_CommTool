@@ -8,6 +8,7 @@ QtObject {
     property color light_bgMain:           "#FFFFFF"
     property color light_border:           "#E5E7EB"
     property color light_bgInner:          "#F3F4F6"
+    property color light_bgChart:          "#F9FAFB"
     property color light_btnPrimary:       "#2563EB"
     property color light_btnPrimaryHover:  "#1D4ED8"
     property color light_btnPrimaryPressed:"#1E40AF"
@@ -38,6 +39,7 @@ QtObject {
     property color dark_bgMain:            "#121212"
     property color dark_border:            "#374151"
     property color dark_bgInner:           "#1F2937"
+    property color dark_bgChart:           "#1E1E2E"
     property color dark_btnPrimary:        "#3B82F6"
     property color dark_btnPrimaryHover:   "#60A5FA"
     property color dark_btnPrimaryPressed: "#1D4ED8"
@@ -68,6 +70,7 @@ QtObject {
     property color bgMain:           isDark ? dark_bgMain : light_bgMain
     property color border:           isDark ? dark_border : light_border
     property color bgInner:          isDark ? dark_bgInner : light_bgInner
+    property color bgChart:          isDark ? dark_bgChart : light_bgChart
     property color btnPrimary:       isDark ? dark_btnPrimary : light_btnPrimary
     property color btnPrimaryHover:  isDark ? dark_btnPrimaryHover : light_btnPrimaryHover
     property color btnPrimaryPressed:isDark ? dark_btnPrimaryPressed : light_btnPrimaryPressed

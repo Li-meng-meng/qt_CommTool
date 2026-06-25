@@ -132,7 +132,53 @@ Rectangle {
                 radius: 4
             }
         }
+
+        Item { Layout.fillHeight: true }
+
+        Button {
+            id: dataPlotBtn
+            text: qsTr("Data Plot")
+            Layout.fillWidth: true
+            onClicked: root.switchToDataPlot()
+            contentItem: Text {
+                text: dataPlotBtn.text
+                color: Theme.ColorTheme.btnNormalText
+                font.family: "Roboto"
+                font.pointSize: 12
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: Theme.ColorTheme.btnNormal
+                border.width: 1
+                border.color: Theme.ColorTheme.btnNormalBorder
+                radius: 4
+            }
+        }
+
+        Button {
+            id: settingsBtn
+            text: qsTr("Settings")
+            Layout.fillWidth: true
+            onClicked: root.openSettings()
+            contentItem: Text {
+                text: settingsBtn.text
+                color: Theme.ColorTheme.btnNormalText
+                font.family: "Roboto"
+                font.pointSize: 12
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: Theme.ColorTheme.btnNormal
+                border.width: 1
+                border.color: Theme.ColorTheme.btnNormalBorder
+                radius: 4
+            }
+        }
     }
 
     signal switchToSerial()
+    signal switchToDataPlot()
+    signal openSettings()
 }

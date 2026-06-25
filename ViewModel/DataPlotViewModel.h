@@ -4,11 +4,14 @@
 #include <QObject>
 #include <QVariantList>
 #include <QMutex>
+#include <QQmlEngine>
+#include <QTimer>
 #include "../Help/DataParser.h"
 
 class DataPlotViewModel : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(QVariantList timeValues READ timeValues NOTIFY dataChanged)
     Q_PROPERTY(QVariantList xValues READ xValues NOTIFY dataChanged)
     Q_PROPERTY(QVariantList yValues READ yValues NOTIFY dataChanged)
@@ -20,7 +23,7 @@ class DataPlotViewModel : public QObject
     Q_PROPERTY(QVariantList pitchValues READ pitchValues NOTIFY dataChanged)
     Q_PROPERTY(QVariantList yawValues READ yawValues NOTIFY dataChanged)
     Q_PROPERTY(bool isPaused READ isPaused NOTIFY isPausedChanged)
-    Q_PROPERTY(bool isViewActive READ isViewActive NOTIFY isViewActiveChanged)
+    Q_PROPERTY(bool isViewActive READ isViewActive WRITE setViewActive NOTIFY isViewActiveChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorOccurred)
 
 public:
@@ -61,6 +64,9 @@ signals:
     void isViewActiveChanged(bool active);
     void errorOccurred(const QString& message);
 
+private slots:
+    void onUpdateTimeout();
+
 private:
     void trimDataLists();
 
@@ -80,8 +86,10 @@ private:
     QString m_errorMessage;
     qint64 m_startTimestamp;
     int m_maxPoints;
+    int m_pendingDataCount;
 
-    QMutex m_dataMutex;
+    mutable QMutex m_dataMutex;
+    QTimer* m_updateTimer;
 };
 
 #endif // DATAPLOTVIEWMODEL_H

@@ -45,11 +45,29 @@ qt_add_qml_module(CommTool
         View/DataPlotView.qml
         View/SettingView.qml
         View/HelpView.qml
+        View/AppSettingsDialog.qml
         View/CommonToolView/SerialSettingView.qml
         View/Component/LineChartWidget.qml
         View/Component/Button.qml
+        View/Component/ChartStatusOverlay.qml
         View/Theme/ColorTheme.qml
         View/Theme/Toast.qml
+        View/Theme/qmldir
+    SOURCES
+        ViewModel/CommViewModel.h
+        ViewModel/CommViewModel.cpp
+        ViewModel/DataPlotViewModel.h
+        ViewModel/DataPlotViewModel.cpp
+        ViewModel/MainViewModel.h
+        ViewModel/MainViewModel.cpp
+        ViewModel/AppSettingsViewModel.h
+        ViewModel/AppSettingsViewModel.cpp
+        Help/CommImpl.h
+        Help/CommImpl.cpp
+        Help/DataParser.h
+        Help/DataParser.cpp
+        Help/crc.h
+        Help/crc.cpp
 )
 
 target_include_directories(CommTool PRIVATE

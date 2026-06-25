@@ -2,10 +2,12 @@
 #define MAINVIEWMODEL_H
 
 #include <QObject>
+#include <QQmlEngine>
 
 class MainViewModel : public QObject
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(int currentView READ currentView WRITE setCurrentView NOTIFY currentViewChanged)
 
 public:

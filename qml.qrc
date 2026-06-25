@@ -9,6 +9,7 @@
     <file>View/CommonToolView/SerialSettingView.qml</file>
     <file>View/Component/LineChartWidget.qml</file>
     <file>View/Component/Button.qml</file>
+    <file>View/Component/ChartStatusOverlay.qml</file>
     <file>View/Theme/ColorTheme.qml</file>
     <file>View/Theme/Toast.qml</file>
 </qresource>

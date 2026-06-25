@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import CommTool.ViewModel 1.0
+import CommTool 1.0
 import "./Theme" as Theme
 import "./Component"
 
@@ -13,78 +13,111 @@ Rectangle {
 
     property var dataPlotViewModel: null
 
+    Connections {
+        target: root.dataPlotViewModel
+        function onDataChanged() {
+            accelChart.updateChart()
+            gyroChart.updateChart()
+            angleChart.updateChart()
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 8
         spacing: 8
 
-        // 加速度图表
         LineChartWidget {
             id: accelChart
             Layout.fillWidth: true
             Layout.fillHeight: true
-            chartTitle: qsTr("加速度实时曲线")
+            title: qsTr("加速度实时曲线")
             yAxisLabel: qsTr("加速度 (m/s²)")
             yMin: -20
             yMax: 20
-            series1Color: "#EF4444"
-            series2Color: "#22C55E"
-            series3Color: "#3B82F6"
             series1Label: "AX"
             series2Label: "AY"
             series3Label: "AZ"
             maxPoints: 5000
-            isPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
-            errorMessage: root.dataPlotViewModel ? root.dataPlotViewModel.errorMessage : ""
+            localPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
 
             timeValues: root.dataPlotViewModel ? root.dataPlotViewModel.timeValues : []
             series1Values: root.dataPlotViewModel ? root.dataPlotViewModel.xValues : []
             series2Values: root.dataPlotViewModel ? root.dataPlotViewModel.yValues : []
             series3Values: root.dataPlotViewModel ? root.dataPlotViewModel.zValues : []
 
-            onClearRequested: {
+            onClearData: {
                 if (root.dataPlotViewModel) {
                     root.dataPlotViewModel.clearChart()
                 }
             }
 
-            onPauseToggled: function(paused) {
-                if (root.dataPlotViewModel) {
-                    root.dataPlotViewModel.setPaused(paused)
-                }
-            }
-
-            onExportRequested: {
+            onExportData: {
                 exportPopup.visible = true
             }
         }
 
-        // 角速度图表
         LineChartWidget {
             id: gyroChart
             Layout.fillWidth: true
             Layout.fillHeight: true
-            chartTitle: qsTr("角速度实时曲线")
+            title: qsTr("角速度实时曲线")
             yAxisLabel: qsTr("角速度 (°/s)")
             yMin: -500
             yMax: 500
-            series1Color: "#F59E0B"
-            series2Color: "#8B5CF6"
-            series3Color: "#EC4899"
             series1Label: "GX"
             series2Label: "GY"
             series3Label: "GZ"
             maxPoints: 5000
-            isPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
+            localPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
 
             timeValues: root.dataPlotViewModel ? root.dataPlotViewModel.timeValues : []
             series1Values: root.dataPlotViewModel ? root.dataPlotViewModel.gxValues : []
             series2Values: root.dataPlotViewModel ? root.dataPlotViewModel.gyValues : []
             series3Values: root.dataPlotViewModel ? root.dataPlotViewModel.gzValues : []
+
+            onClearData: {
+                if (root.dataPlotViewModel) {
+                    root.dataPlotViewModel.clearChart()
+                }
+            }
+
+            onExportData: {
+                exportPopup.visible = true
+            }
+        }
+
+        LineChartWidget {
+            id: angleChart
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            title: qsTr("姿态角实时曲线")
+            yAxisLabel: qsTr("角度 (°)")
+            yMin: -180
+            yMax: 180
+            series1Label: "Roll"
+            series2Label: "Pitch"
+            series3Label: "Yaw"
+            maxPoints: 5000
+            localPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
+
+            timeValues: root.dataPlotViewModel ? root.dataPlotViewModel.timeValues : []
+            series1Values: root.dataPlotViewModel ? root.dataPlotViewModel.rollValues : []
+            series2Values: root.dataPlotViewModel ? root.dataPlotViewModel.pitchValues : []
+            series3Values: root.dataPlotViewModel ? root.dataPlotViewModel.yawValues : []
+
+            onClearData: {
+                if (root.dataPlotViewModel) {
+                    root.dataPlotViewModel.clearChart()
+                }
+            }
+
+            onExportData: {
+                exportPopup.visible = true
+            }
         }
     }
 
-    // Export popup
     Popup {
         id: exportPopup
         anchors.centerIn: parent
