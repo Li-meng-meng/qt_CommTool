@@ -4,6 +4,7 @@
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QtEndian>
+#include "../Help/crc.h"
 
 CommandViewModel::CommandViewModel(QObject *parent)
     : QObject(parent)
@@ -51,7 +52,8 @@ void CommandViewModel::generateHex()
     quint8 cmd = m_selectedCommand["cmd"].toUInt();
     quint8 id = m_selectedCommand["subId"].toUInt();
     quint8 op = static_cast<quint8>(m_selectedOp);
-    quint16 data1 = static_cast<quint16>(m_selectedData1);
+
+    QByteArray payload = buildPayload(cmd, id);
 
     send_user_head_t head;
     head.sof = 0xAA;
@@ -59,19 +61,98 @@ void CommandViewModel::generateHex()
     head.cmd = cmd;
     head.id = id;
     head.op = op;
-    head.v_len = qToBigEndian(data1);
+    ushort dataLen = static_cast<ushort>(7 + payload.size() + 2);
+    head.v_len = dataLen;
+
+    QByteArray headerBytes(reinterpret_cast<const char*>(&head), sizeof(send_user_head_t));
+
+    QByteArray dataWithoutCrc = headerBytes + payload;
+
+    quint16 calculatedCrc16 = CRC::CRC16(
+        reinterpret_cast<const quint8*>(dataWithoutCrc.constData()),
+        static_cast<quint16>(dataWithoutCrc.size())
+    );
+
+    QByteArray crcBytes(2, 0);
+    crcBytes[0] = static_cast<char>(calculatedCrc16 & 0xFF);
+    crcBytes[1] = static_cast<char>((calculatedCrc16 >> 8) & 0xFF);
+
+    QByteArray finalPacket = dataWithoutCrc + crcBytes;
 
     QString hex;
-    hex += QString("%1 ").arg(head.sof, 2, 16, QChar('0')).toUpper();
-    hex += QString("%1 ").arg(head.sof1, 2, 16, QChar('0')).toUpper();
-    hex += QString("%1 ").arg(head.cmd, 2, 16, QChar('0')).toUpper();
-    hex += QString("%1 ").arg(head.id, 2, 16, QChar('0')).toUpper();
-    hex += QString("%1 ").arg(head.op, 2, 16, QChar('0')).toUpper();
-    hex += QString("%1 ").arg((head.v_len >> 8) & 0xFF, 2, 16, QChar('0')).toUpper();
-    hex += QString("%1").arg(head.v_len & 0xFF, 2, 16, QChar('0')).toUpper();
+    for (int i = 0; i < finalPacket.size(); ++i) {
+        hex += QString("%1 ").arg(static_cast<quint8>(finalPacket[i]), 2, 16, QChar('0')).toUpper();
+    }
+    hex = hex.trimmed();
 
     m_generatedHex = hex;
     emit generatedHexChanged();
+}
+
+QByteArray CommandViewModel::buildPayload(quint8 cmd, quint8 id)
+{
+    switch (cmd) {
+    case 0:
+        switch (id) {
+        case 1:
+        case 2:
+        case 3:
+        case 9:
+        case 10:
+            return QByteArray();
+        case 4:
+        case 6:
+        case 7:
+        case 8: {
+            QByteArray payload(1, 0);
+            payload[0] = static_cast<char>(m_selectedData1 & 0xFF);
+            return payload;
+        }
+        case 5: {
+            QByteArray payload(16, 0);
+            QString strValue = QString::number(m_selectedData1);
+            for (int i = 0; i < strValue.size() && i < 16; ++i) {
+                payload[i] = static_cast<char>(strValue.at(i).unicode());
+            }
+            return payload;
+        }
+        default:
+            return QByteArray();
+        }
+    case 1:
+        switch (id) {
+        case 2:
+            return QByteArray();
+        case 1:
+        case 3: {
+            QByteArray payload(1, 0);
+            payload[0] = static_cast<char>(m_selectedData1 & 0xFF);
+            return payload;
+        }
+        default:
+            return QByteArray();
+        }
+    case 2:
+        switch (id) {
+        case 2:
+            return QByteArray();
+        case 1:
+        case 3: {
+            QByteArray payload(1, 0);
+            payload[0] = static_cast<char>(m_selectedData1 & 0xFF);
+            return payload;
+        }
+        default:
+            return QByteArray();
+        }
+    case 3:
+        switch (id) {
+        default:
+            return QByteArray();
+        }
+    default:
+        return QByteArray();
+    }
 }
 
 void CommandViewModel::copyHex()
@@ -85,20 +166,40 @@ void CommandViewModel::copyHex()
 
 void CommandViewModel::sendCommand(quint8 cmd, quint8 id)
 {
+    quint8 op = static_cast<quint8>(m_selectedOp);
+
+    QByteArray payload = buildPayload(cmd, id);
+
     send_user_head_t head;
     head.sof = 0xAA;
     head.sof1 = 0x55;
     head.cmd = cmd;
     head.id = id;
-    head.op = static_cast<quint8>(m_selectedOp);
-    head.v_len = qToBigEndian(static_cast<quint16>(m_selectedData1));
+    head.op = op;
+    ushort dataLen = static_cast<ushort>(7 + payload.size() + 2);
+    head.v_len = dataLen;
 
-    QByteArray data(reinterpret_cast<const char*>(&head), sizeof(send_user_head_t));
-    emit sendDataRequested(data);
+    QByteArray headerBytes(reinterpret_cast<const char*>(&head), sizeof(send_user_head_t));
+
+    QByteArray dataWithoutCrc = headerBytes + payload;
+
+    quint16 calculatedCrc16 = CRC::CRC16(
+        reinterpret_cast<const quint8*>(dataWithoutCrc.constData()),
+        static_cast<quint16>(dataWithoutCrc.size())
+    );
+
+    QByteArray crcBytes(2, 0);
+    crcBytes[0] = static_cast<char>(calculatedCrc16 & 0xFF);
+    crcBytes[1] = static_cast<char>((calculatedCrc16 >> 8) & 0xFF);
+
+    QByteArray finalPacket = dataWithoutCrc + crcBytes;
+
+    emit sendDataRequested(finalPacket);
     emit commandSent(cmd, id);
 
     qDebug() << "[CommandViewModel] Sent command: cmd=" << QString::number(cmd, 16)
-             << ", id=" << QString::number(id, 16);
+             << ", id=" << QString::number(id, 16)
+             << ", HEX=" << finalPacket.toHex(' ').toUpper();
 }
 
 void CommandViewModel::setSelectedCommand(const QVariantMap& cmd)

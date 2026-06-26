@@ -46,6 +46,7 @@ signals:
 
 private:
     void initCommandGroups();
+    QByteArray buildPayload(quint8 cmd, quint8 id);
 
     QVariantList m_commandGroups;
     QVariantMap m_selectedCommand;

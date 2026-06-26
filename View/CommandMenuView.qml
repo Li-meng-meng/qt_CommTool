@@ -250,87 +250,88 @@ Rectangle {
             }
 
             Rectangle {
-    Layout.fillWidth: true
-    Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.fillHeight: true
 
-    color: Theme.ColorTheme.bgInner
-    radius: 4
+                color: Theme.ColorTheme.bgInner
+                radius: 4
 
-    border.color: Theme.ColorTheme.border
-    border.width: 1
+                border.color: Theme.ColorTheme.border
+                border.width: 1
 
-    readonly property int labelWidth: 80
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 8
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 8
-        spacing: 8
-
-        Text {
-            text: "协议指令详情"
-            color: Theme.ColorTheme.textMain
-            font.bold: true
-            font.pixelSize: 14
-        }
-
-        // ===========================
-        // 参数编辑
-        // ===========================
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 190
-            Layout.minimumHeight: 190
-
-            color: Theme.ColorTheme.bgMain
-            radius: 4
-
-            border.color: Theme.ColorTheme.border
-            border.width: 1
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 8
-
-                Text {
-                    text: "参数编辑"
-                    font.bold: true
-                    font.pixelSize: 12
-                    color: Theme.ColorTheme.textMain
-                }
-
-                GridLayout {
-                    Layout.fillWidth: true
-
-                    columns: 2
-                    rowSpacing: 8
-                    columnSpacing: 12
+                    readonly property int labelWidth: 80
 
                     Text {
-                        text: "指令名称:"
-                        color: Theme.ColorTheme.textSub
-                        Layout.preferredWidth: labelWidth
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-
-                        text: viewModel
-                              && viewModel.selectedCommand
-                              && viewModel.selectedCommand["label"] !== undefined
-                              ? viewModel.selectedCommand["label"]
-                              : "请选择命令"
-
+                        text: "协议指令详情"
                         color: Theme.ColorTheme.textMain
                         font.bold: true
-
-                        elide: Text.ElideRight
+                        font.pixelSize: 14
                     }
 
-                    Text {
-                        text: "操作符号:"
-                        color: Theme.ColorTheme.textSub
-                    }
+                    // ===========================
+                    // 参数编辑
+                    // ===========================
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 190
+                        Layout.minimumHeight: 190
+
+                        color: Theme.ColorTheme.bgMain
+                        radius: 4
+
+                        border.color: Theme.ColorTheme.border
+                        border.width: 1
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            spacing: 8
+
+                            Text {
+                                text: "参数编辑"
+                                font.bold: true
+                                font.pixelSize: 12
+                                color: Theme.ColorTheme.textMain
+                            }
+
+                            GridLayout {
+                                Layout.fillWidth: true
+
+                                columns: 2
+                                rowSpacing: 8
+                                columnSpacing: 12
+
+                                Text {
+                                    text: "指令名称:"
+                                    color: Theme.ColorTheme.textSub
+                                    Layout.preferredWidth: 80
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+
+                                    text: viewModel
+                                          && viewModel.selectedCommand
+                                          && viewModel.selectedCommand["label"] !== undefined
+                                          ? viewModel.selectedCommand["label"]
+                                          : "请选择命令"
+
+                                    color: Theme.ColorTheme.textMain
+                                    font.bold: true
+
+                                    elide: Text.ElideRight
+                                }
+
+                                Text {
+                                    text: "操作符号:"
+                                    color: Theme.ColorTheme.textSub
+                                    Layout.preferredWidth: 80
+                                }
 
                     TextField {
                         id: opInput
