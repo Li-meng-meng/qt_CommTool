@@ -57,14 +57,19 @@ Window {
                 root.currentPage = 1
                 commViewModel.isPlotViewActive = true
                 commViewModel.dataPlotViewModel.isViewActive = true
+                commViewModel.isShowViewActive = false
             }
             onSwitchToCommand: {
                 root.currentPage = 2
+                commViewModel.isPlotViewActive = false
+                commViewModel.dataPlotViewModel.isViewActive = false
+                commViewModel.isShowViewActive = false
             }
             onSwitchToSerial: {
                 root.currentPage = 0
                 commViewModel.isPlotViewActive = false
                 commViewModel.dataPlotViewModel.isViewActive = false
+                commViewModel.isShowViewActive = true
             }
         }
 

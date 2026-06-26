@@ -121,6 +121,7 @@ private:
     SerialParity parityFromInt(int index) const;
     SerialStopBits stopBitsFromInt(int index) const;
     SerialFlowControl flowControlFromInt(int index) const;
+    void flushReceiveBuffer();
 
     SerialService m_serial;
     QString m_portName;
@@ -131,6 +132,7 @@ private:
     int m_flowControl;
     int m_connectState;
     QString m_receiveData;
+    QString m_receiveBuffer;
     QString m_sendHistory;
     QStringList m_portList;
     bool m_hexDisplay;
@@ -138,6 +140,9 @@ private:
     bool m_parseEnabled;
     bool m_isPlotViewActive;
     bool m_isShowViewActive;
+    bool m_receiveBufferDirty;
+
+    QTimer* m_receiveFlushTimer;
 
     DataParser* m_dataParser;
     DataPlotViewModel* m_dataPlotViewModel;

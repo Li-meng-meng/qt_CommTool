@@ -2,6 +2,7 @@
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDebug>
+#include <QTimer>
 
 CommViewModel::CommViewModel(QObject *parent)
     : QObject(parent)
@@ -15,11 +16,17 @@ CommViewModel::CommViewModel(QObject *parent)
     , m_parseEnabled(true)
     , m_isPlotViewActive(false)
     , m_isShowViewActive(true)
+    , m_receiveBufferDirty(false)
+    , m_receiveFlushTimer(new QTimer(this))
     , m_dataParser(new DataParser(this))
     , m_dataPlotViewModel(new DataPlotViewModel(this))
     , m_commandViewModel(new CommandViewModel(this))
 {
-    // 串口信号连接
+    connect(m_receiveFlushTimer, &QTimer::timeout,
+        this, &CommViewModel::flushReceiveBuffer);
+    m_receiveFlushTimer->setInterval(100);
+    m_receiveFlushTimer->start();
+
     connect(&m_serial, &SerialService::sigConnectStateChanged,
         this, &CommViewModel::onStateChanged);
     connect(&m_serial, &SerialService::sigRecvData,
@@ -27,7 +34,6 @@ CommViewModel::CommViewModel(QObject *parent)
     connect(&m_serial, &SerialService::sigErrorOccurred,
         this, &CommViewModel::onErrorOccurred);
 
-    // DataParser 信号连接
     connect(m_dataParser, &DataParser::newAccelData,
         this, &CommViewModel::onNewAccelData);
     connect(m_dataParser, &DataParser::newGyroData,
@@ -216,6 +222,9 @@ void CommViewModel::setIsShowViewActive(bool active)
     if (m_isShowViewActive != active) {
         m_isShowViewActive = active;
         emit isShowViewActiveChanged(m_isShowViewActive);
+        if (active && m_receiveBufferDirty) {
+            flushReceiveBuffer();
+        }
     }
 }
 
@@ -301,6 +310,8 @@ void CommViewModel::refreshPortList()
 void CommViewModel::clearReceiveData()
 {
     m_receiveData.clear();
+    m_receiveBuffer.clear();
+    m_receiveBufferDirty = false;
     emit receiveDataChanged(m_receiveData);
 }
 
@@ -323,7 +334,6 @@ void CommViewModel::onStateChanged(CommConnectState state)
 
 void CommViewModel::onRecvData(const QByteArray& data)
 {
-    // 只有当数据显示页面激活时才更新接收窗口
     if (m_isShowViewActive) {
         QString displayData;
         if (m_hexDisplay) {
@@ -331,14 +341,29 @@ void CommViewModel::onRecvData(const QByteArray& data)
         } else {
             displayData = QString::fromUtf8(data);
         }
-        m_receiveData += displayData;
-        emit receiveDataChanged(m_receiveData);
+        m_receiveBuffer += displayData;
+        m_receiveBufferDirty = true;
     }
 
-    // 只有当数据绘图页面激活时才解析数据
-    if (m_isPlotViewActive && m_parseEnabled) {
+    if (m_parseEnabled) {
         m_dataParser->parse(data);
     }
+}
+
+void CommViewModel::flushReceiveBuffer()
+{
+    if (!m_receiveBufferDirty || !m_isShowViewActive) {
+        return;
+    }
+
+    const int maxChars = 50000;
+    if (m_receiveBuffer.size() > maxChars) {
+        m_receiveBuffer = m_receiveBuffer.right(maxChars);
+    }
+
+    m_receiveData = m_receiveBuffer;
+    m_receiveBufferDirty = false;
+    emit receiveDataChanged(m_receiveData);
 }
 
 void CommViewModel::onErrorOccurred(const QString& message)
