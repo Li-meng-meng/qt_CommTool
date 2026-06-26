@@ -5,24 +5,27 @@ project(CommTool LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick QuickControls2 Graphs SerialPort)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick QuickControls2 Graphs SerialPort Bluetooth Test)
 
 qt_standard_project_setup()
 
 add_library(CommModelLib STATIC
     CommModelLib/SerialPort/SerialService.cpp
+    CommModelLib/Bluetooth/BluetoothService.cpp
     CommModelLib/Common/BaseCommService.cpp
 )
 
 target_include_directories(CommModelLib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/CommModelLib
     ${CMAKE_CURRENT_SOURCE_DIR}/CommModelLib/SerialPort
+    ${CMAKE_CURRENT_SOURCE_DIR}/CommModelLib/Bluetooth
     ${CMAKE_CURRENT_SOURCE_DIR}/CommModelLib/Common
 )
 
 target_link_libraries(CommModelLib PRIVATE
     Qt6::Core
     Qt6::SerialPort
+    Qt6::Bluetooth
 )
 
 qt_add_executable(CommTool WIN32
@@ -95,3 +98,30 @@ install(TARGETS CommTool
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+add_executable(SerialServiceTest
+    tests/CommModelLibTest/SerialServiceTest.cpp
+    tests/CommModelLibTest/SerialServiceTest.h
+)
+
+target_link_libraries(SerialServiceTest PRIVATE
+    Qt6::Core
+    Qt6::SerialPort
+    Qt6::Test
+    CommModelLib
+)
+
+add_executable(BluetoothServiceTest
+    tests/CommModelLibTest/BluetoothServiceTest.cpp
+    tests/CommModelLibTest/BluetoothServiceTest.h
+)
+
+target_link_libraries(BluetoothServiceTest PRIVATE
+    Qt6::Core
+    Qt6::Bluetooth
+    Qt6::Test
+    CommModelLib
+)
+
+add_test(NAME SerialServiceTest COMMAND SerialServiceTest)
+add_test(NAME BluetoothServiceTest COMMAND BluetoothServiceTest)
