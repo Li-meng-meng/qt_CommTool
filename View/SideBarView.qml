@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import "./Theme" as Theme
+import "./Component"
 
 Rectangle {
     id: root
@@ -33,169 +34,67 @@ Rectangle {
         Button {
             id: serialBtn
             text: qsTr("Serial Port")
+            buttonType: "primary"
             Layout.fillWidth: true
             onClicked: root.switchToSerial()
-            contentItem: Text {
-                text: serialBtn.text
-                color: Theme.ColorTheme.btnPrimaryText
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.btnPrimary
-                radius: 4
-            }
         }
 
         Button {
             id: bluetoothBtn
             text: qsTr("Bluetooth")
+            buttonType: "normal"
             Layout.fillWidth: true
             enabled: false
-            contentItem: Text {
-                text: bluetoothBtn.text
-                color: Theme.ColorTheme.textSub
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.bgMain
-                border.width: 1
-                border.color: Theme.ColorTheme.border
-                radius: 4
-            }
         }
 
         Button {
             id: wifiBtn
             text: qsTr("WiFi")
+            buttonType: "normal"
             Layout.fillWidth: true
             enabled: false
-            contentItem: Text {
-                text: wifiBtn.text
-                color: Theme.ColorTheme.textSub
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.bgMain
-                border.width: 1
-                border.color: Theme.ColorTheme.border
-                radius: 4
-            }
         }
 
         Button {
             id: mqttBtn
             text: qsTr("MQTT")
+            buttonType: "normal"
             Layout.fillWidth: true
             enabled: false
-            contentItem: Text {
-                text: mqttBtn.text
-                color: Theme.ColorTheme.textSub
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.bgMain
-                border.width: 1
-                border.color: Theme.ColorTheme.border
-                radius: 4
-            }
         }
 
         Button {
             id: httpBtn
             text: qsTr("HTTP")
+            buttonType: "normal"
             Layout.fillWidth: true
             enabled: false
-            contentItem: Text {
-                text: httpBtn.text
-                color: Theme.ColorTheme.textSub
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.bgMain
-                border.width: 1
-                border.color: Theme.ColorTheme.border
-                radius: 4
-            }
         }
 
         Item { Layout.fillHeight: true }
 
         Button {
-            id: dataPlotBtn
-            text: qsTr("Data Plot")
+            id: commandBtn
+            text: qsTr("Commands")
+            buttonType: "primary"
             Layout.fillWidth: true
-            onClicked: root.switchToDataPlot()
-            contentItem: Text {
-                text: dataPlotBtn.text
-                color: Theme.ColorTheme.btnNormalText
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.btnNormal
-                border.width: 1
-                border.color: Theme.ColorTheme.btnNormalBorder
-                radius: 4
-            }
+            onClicked: root.switchToCommand()
         }
 
         Button {
-            id: commandBtn
-            text: qsTr("Commands")
+            id: dataPlotBtn
+            text: qsTr("Data Plot")
+            buttonType: "normal"
             Layout.fillWidth: true
-            onClicked: root.switchToCommand()
-            contentItem: Text {
-                text: commandBtn.text
-                color: Theme.ColorTheme.btnNormalText
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.btnNormal
-                border.width: 1
-                border.color: Theme.ColorTheme.btnNormalBorder
-                radius: 4
-            }
+            onClicked: root.switchToDataPlot()
         }
 
         Button {
             id: settingsBtn
             text: qsTr("Settings")
+            buttonType: "normal"
             Layout.fillWidth: true
             onClicked: root.openSettings()
-            contentItem: Text {
-                text: settingsBtn.text
-                color: Theme.ColorTheme.btnNormalText
-                font.family: "Roboto"
-                font.pointSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                color: Theme.ColorTheme.btnNormal
-                border.width: 1
-                border.color: Theme.ColorTheme.btnNormalBorder
-                radius: 4
-            }
         }
     }
 

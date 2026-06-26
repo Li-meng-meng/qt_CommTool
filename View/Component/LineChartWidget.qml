@@ -25,6 +25,7 @@ Rectangle {
     property bool showSeries2: true
     property bool showSeries3: true
     property bool localPaused: false
+    property bool collapsed: false
 
     property int lastUpdateIndex: -1
 
@@ -42,6 +43,19 @@ Rectangle {
 
             Row {
                 spacing: 8
+                MouseArea {
+                    id: collapseButton
+                    width: 16
+                    height: 16
+                    cursorShape: Qt.PointingHandCursor
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.collapsed ? "▶" : "▼"
+                        color: Theme.ColorTheme.textMain
+                        font.pixelSize: 10
+                    }
+                    onClicked: root.collapsed = !root.collapsed
+                }
                 Text {
                     text: root.title
                     color: Theme.ColorTheme.textMain
@@ -146,6 +160,7 @@ Rectangle {
 
         GraphsView {
             id: graphsView
+            visible: !root.collapsed
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -207,7 +222,7 @@ Rectangle {
     }
 
     function updateChart() {
-        if (root.localPaused) return
+        if (root.localPaused || root.collapsed) return
 
         var dataCount = root.timeValues.length
         if (dataCount === 0) {
@@ -295,6 +310,14 @@ Rectangle {
             if (t >= range.min && t <= range.max && i < values.length) {
                 series.append(t, values[i])
             }
+        }
+    }
+
+    onCollapsedChanged: {
+        if (!root.collapsed && root.lastUpdateIndex >= 0) {
+            rebuildSeries(series1, root.series1Values)
+            rebuildSeries(series2, root.series2Values)
+            rebuildSeries(series3, root.series3Values)
         }
     }
 }

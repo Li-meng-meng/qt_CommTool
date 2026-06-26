@@ -66,30 +66,6 @@ Window {
                 Item {
                     Layout.fillWidth: true
                 }
-
-                Button {
-                    id: closeBtn
-                    width: 24
-                    height: 24
-                    text: qsTr("×")
-                    onClicked: root.visible = false
-
-                    background: Rectangle {
-                        color: closeBtn.pressed ? Theme.ColorTheme.btnDangerHover :
-                               closeBtn.hovered ? Theme.ColorTheme.bgMain :
-                               "transparent"
-                        radius: 4
-                    }
-
-                    contentItem: Text {
-                        text: closeBtn.text
-                        color: Theme.ColorTheme.textSub
-                        font.pointSize: 18
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                }
             }
         }
 

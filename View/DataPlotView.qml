@@ -82,7 +82,9 @@ Rectangle {
 
             delegate: LineChartWidget {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.fillHeight: !collapsed
+                Layout.preferredHeight: collapsed ? 36 : -1
+                Layout.minimumHeight: collapsed ? 36 : 0
                 title: modelData.title
                 yAxisLabel: modelData.yAxisLabel
                 yMin: modelData.yMin
