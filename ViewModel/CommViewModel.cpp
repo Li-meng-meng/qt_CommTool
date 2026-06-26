@@ -377,7 +377,7 @@ void CommViewModel::onErrorOccurred(const QString& message)
 void CommViewModel::onNewAccelData(const AccelerationData& data)
 {
     if (m_parseEnabled) {
-        m_dataPlotViewModel->addDataPoint(data.timestamp, data.ax, data.ay, data.az, 0, 0, 0, 0, 0, 0);
+        m_dataPlotViewModel->addDataPoint(data.timestamp, data.ax, data.ay, data.az, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         emit accelerationDataReady(data);
     }
 }
@@ -385,7 +385,7 @@ void CommViewModel::onNewAccelData(const AccelerationData& data)
 void CommViewModel::onNewGyroData(const GyroscopeData& data)
 {
     if (m_parseEnabled) {
-        m_dataPlotViewModel->addDataPoint(data.timestamp, 0, 0, 0, data.gx, data.gy, data.gz, 0, 0, 0);
+        m_dataPlotViewModel->addDataPoint(data.timestamp, 0, 0, 0, data.gx, data.gy, data.gz, 0, 0, 0, 0, 0, 0);
         emit gyroscopeDataReady(data);
     }
 }
@@ -399,7 +399,8 @@ void CommViewModel::onNewSensorData(const SensorData& data)
         m_dataPlotViewModel->addDataPoint(static_cast<qint64>(data.Timestamp),
             data.Acc[0], data.Acc[1], data.Acc[2],
             data.Gyro[0], data.Gyro[1], data.Gyro[2],
-            data.Angle[0], data.Angle[1], data.Angle[2]);
+            data.Angle[0], data.Angle[1], data.Angle[2],
+            0, 0, 0);
         emit sensorDataReady(data);
     }
 }
@@ -418,7 +419,8 @@ void CommViewModel::onNewSensorDataPacket(const SensorDataPacket& data)
         m_dataPlotViewModel->addDataPoint(timestamp,
             data.Acceleration[0], data.Acceleration[1], data.Acceleration[2],
             data.AngularVelocity[0], data.AngularVelocity[1], data.AngularVelocity[2],
-            data.EulerAngles[0], data.EulerAngles[1], data.EulerAngles[2]);
+            data.EulerAngles[0], data.EulerAngles[1], data.EulerAngles[2],
+            data.Magnetometer[0], data.Magnetometer[1], data.Magnetometer[2]);
     }
 }
 
@@ -432,7 +434,8 @@ void CommViewModel::onNewAllData(const AllDataPacket& data)
         m_dataPlotViewModel->addDataPoint(timestamp,
             data.Acceleration[0], data.Acceleration[1], data.Acceleration[2],
             data.AngularVelocity[0], data.AngularVelocity[1], data.AngularVelocity[2],
-            data.EulerAngles[0], data.EulerAngles[1], data.EulerAngles[2]);
+            data.EulerAngles[0], data.EulerAngles[1], data.EulerAngles[2],
+            0, 0, 0);
     }
 }
 

@@ -4,6 +4,7 @@
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QtEndian>
+#include <QDateTime>
 #include "../Help/crc.h"
 
 CommandViewModel::CommandViewModel(QObject *parent)
@@ -58,6 +59,202 @@ int CommandViewModel::selectedOp() const
 int CommandViewModel::selectedData1() const
 {
     return m_selectedData1;
+}
+
+QVariantList CommandViewModel::chartConfigs() const
+{
+    return m_chartConfigs;
+}
+
+QVariantList CommandViewModel::getChartTimeValues(int chartIndex) const
+{
+    if (chartIndex < 0 || chartIndex >= m_chartTimeLists.size()) {
+        return {};
+    }
+    return m_chartTimeLists[chartIndex];
+}
+
+QVariantList CommandViewModel::getChartSeriesValues(int chartIndex, int seriesIndex) const
+{
+    if (chartIndex < 0 || chartIndex >= m_chartSeriesLists.size()) {
+        return {};
+    }
+    if (seriesIndex < 0 || seriesIndex >= m_chartSeriesLists[chartIndex].size()) {
+        return {};
+    }
+    return m_chartSeriesLists[chartIndex][seriesIndex];
+}
+
+void CommandViewModel::clearChartData()
+{
+    for (auto& list : m_chartTimeLists) {
+        list.clear();
+    }
+    for (auto& outer : m_chartSeriesLists) {
+        for (auto& inner : outer) {
+            inner.clear();
+        }
+    }
+    m_chartStartTime = 0;
+    m_chartDataVersion++;
+    emit chartDataVersionChanged();
+    emit chartDataChanged();
+}
+
+void CommandViewModel::setChartPaused(bool paused)
+{
+    if (m_chartPaused != paused) {
+        m_chartPaused = paused;
+        emit chartPausedChanged(paused);
+    }
+}
+
+int CommandViewModel::chartDataVersion() const
+{
+    return m_chartDataVersion;
+}
+
+bool CommandViewModel::chartPaused() const
+{
+    return m_chartPaused;
+}
+
+void CommandViewModel::updateChartConfigs()
+{
+    m_chartConfigs.clear();
+    m_chartTimeLists.clear();
+    m_chartSeriesLists.clear();
+
+    if (m_selectedCommand.isEmpty()) {
+        emit chartConfigsChanged();
+        return;
+    }
+
+    int cmd = m_selectedCommand.value("cmd").toInt();
+    int id = m_selectedCommand.value("subId").toInt();
+
+    if (cmd == 0x00 && id == 0x01) {
+        m_chartConfigs.append(QVariantMap{
+            {"title", "加速度"},
+            {"yAxisLabel", "m/s²"},
+            {"yMin", -20},
+            {"yMax", 20},
+            {"seriesLabels", QStringList{"AX", "AY", "AZ"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "角速度"},
+            {"yAxisLabel", "deg/s"},
+            {"yMin", -500},
+            {"yMax", 500},
+            {"seriesLabels", QStringList{"GX", "GY", "GZ"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "姿态角"},
+            {"yAxisLabel", "deg"},
+            {"yMin", -180},
+            {"yMax", 180},
+            {"seriesLabels", QStringList{"Roll", "Pitch", "Yaw"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "磁场"},
+            {"yAxisLabel", "uT"},
+            {"yMin", -100},
+            {"yMax", 100},
+            {"seriesLabels", QStringList{"MX", "MY", "MZ"}}
+        });
+    } else if (cmd == 0x00 && id == 0x10) {
+        m_chartConfigs.append(QVariantMap{
+            {"title", "加速度"},
+            {"yAxisLabel", "m/s²"},
+            {"yMin", -20},
+            {"yMax", 20},
+            {"seriesLabels", QStringList{"AX", "AY", "AZ"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "角速度"},
+            {"yAxisLabel", "deg/s"},
+            {"yMin", -500},
+            {"yMax", 500},
+            {"seriesLabels", QStringList{"GX", "GY", "GZ"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "姿态角"},
+            {"yAxisLabel", "deg"},
+            {"yMin", -180},
+            {"yMax", 180},
+            {"seriesLabels", QStringList{"Roll", "Pitch", "Yaw"}}
+        });
+    } else if (cmd == 0x01 && id == 0x02) {
+        m_chartConfigs.append(QVariantMap{
+            {"title", "加速度"},
+            {"yAxisLabel", "m/s²"},
+            {"yMin", -20},
+            {"yMax", 20},
+            {"seriesLabels", QStringList{"AX", "AY", "AZ"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "角速度"},
+            {"yAxisLabel", "deg/s"},
+            {"yMin", -500},
+            {"yMax", 500},
+            {"seriesLabels", QStringList{"GX", "GY", "GZ"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "姿态角"},
+            {"yAxisLabel", "deg"},
+            {"yMin", -180},
+            {"yMax", 180},
+            {"seriesLabels", QStringList{"Roll", "Pitch", "Yaw"}}
+        });
+        m_chartConfigs.append(QVariantMap{
+            {"title", "磁场"},
+            {"yAxisLabel", "uT"},
+            {"yMin", -100},
+            {"yMax", 100},
+            {"seriesLabels", QStringList{"MX", "MY", "MZ"}}
+        });
+    }
+
+    int chartCount = m_chartConfigs.size();
+    m_chartTimeLists.resize(chartCount);
+    m_chartSeriesLists.resize(chartCount);
+    for (int i = 0; i < chartCount; ++i) {
+        QVariantMap cfg = m_chartConfigs[i].toMap();
+        int seriesCount = cfg.value("seriesLabels").toStringList().size();
+        m_chartSeriesLists[i].resize(seriesCount);
+    }
+
+    m_chartStartTime = 0;
+    m_chartDataVersion++;
+    emit chartDataVersionChanged();
+    emit chartConfigsChanged();
+    emit chartDataChanged();
+}
+
+void CommandViewModel::addChartValue(int chartIndex, int seriesIndex, float value, float timeOffset)
+{
+    Q_UNUSED(timeOffset);
+    if (m_chartPaused) return;
+    if (chartIndex < 0 || chartIndex >= m_chartTimeLists.size()) return;
+    if (seriesIndex < 0 || seriesIndex >= m_chartSeriesLists[chartIndex].size()) return;
+
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    if (m_chartStartTime == 0) {
+        m_chartStartTime = now;
+    }
+    float t = (now - m_chartStartTime) / 1000.0f;
+
+    if (seriesIndex == 0) {
+        m_chartTimeLists[chartIndex].append(t);
+        if (m_chartTimeLists[chartIndex].size() > m_maxChartPoints) {
+            m_chartTimeLists[chartIndex].removeFirst();
+        }
+    }
+
+    m_chartSeriesLists[chartIndex][seriesIndex].append(value);
+    if (m_chartSeriesLists[chartIndex][seriesIndex].size() > m_maxChartPoints) {
+        m_chartSeriesLists[chartIndex][seriesIndex].removeFirst();
+    }
 }
 
 void CommandViewModel::generateHex()
@@ -236,6 +433,7 @@ void CommandViewModel::setSelectedCommand(const QVariantMap& cmd)
     m_hexdDirty = false;
     emit receivedHexChanged();
 
+    updateChartConfigs();
     generateHex();
 }
 
@@ -359,6 +557,22 @@ void CommandViewModel::handleReceivedData(quint8 cmd, quint8 id, const QByteArra
                        .arg(imuData.Magnetometer[1], 0, 'F', 2)
                        .arg(imuData.Magnetometer[2], 0, 'F', 2);
             text += QString("CRC16:  0x%1\n").arg(imuData.Crc16, 4, 16, QChar('0')).toUpper();
+
+            addChartValue(0, 0, imuData.Acceleration[0]);
+            addChartValue(0, 1, imuData.Acceleration[1]);
+            addChartValue(0, 2, imuData.Acceleration[2]);
+            addChartValue(1, 0, imuData.AngularVelocity[0]);
+            addChartValue(1, 1, imuData.AngularVelocity[1]);
+            addChartValue(1, 2, imuData.AngularVelocity[2]);
+            addChartValue(2, 0, imuData.EulerAngles[0]);
+            addChartValue(2, 1, imuData.EulerAngles[1]);
+            addChartValue(2, 2, imuData.EulerAngles[2]);
+            addChartValue(3, 0, imuData.Magnetometer[0]);
+            addChartValue(3, 1, imuData.Magnetometer[1]);
+            addChartValue(3, 2, imuData.Magnetometer[2]);
+            m_chartDataVersion++;
+            emit chartDataVersionChanged();
+            emit chartDataChanged();
             break;
         }
         case 0x02: {
@@ -435,6 +649,19 @@ void CommandViewModel::handleReceivedData(quint8 cmd, quint8 id, const QByteArra
             text += QString("姿态 Pitch: %1 °\n").arg(sensorData.Angle[1], 0, 'F', 2);
             text += QString("姿态 Yaw:   %1 °\n").arg(sensorData.Angle[2], 0, 'F', 2);
             text += QString("CRC16: 0x%1\n").arg(sensorData.Crc16, 4, 16, QChar('0')).toUpper();
+
+            addChartValue(0, 0, sensorData.Acc[0]);
+            addChartValue(0, 1, sensorData.Acc[1]);
+            addChartValue(0, 2, sensorData.Acc[2]);
+            addChartValue(1, 0, sensorData.Gyro[0]);
+            addChartValue(1, 1, sensorData.Gyro[1]);
+            addChartValue(1, 2, sensorData.Gyro[2]);
+            addChartValue(2, 0, sensorData.Angle[0]);
+            addChartValue(2, 1, sensorData.Angle[1]);
+            addChartValue(2, 2, sensorData.Angle[2]);
+            m_chartDataVersion++;
+            emit chartDataVersionChanged();
+            emit chartDataChanged();
             break;
         }
         default:
@@ -481,6 +708,22 @@ void CommandViewModel::handleReceivedData(quint8 cmd, quint8 id, const QByteArra
             text += QString("用户A值: %1\n").arg(imuData.UserA);
             text += QString("电量: %1\n").arg(imuData.BatteryLevel);
             text += QString("CRC16:  0x%1\n").arg(imuData.Crc16, 4, 16, QChar('0')).toUpper();
+
+            addChartValue(0, 0, imuData.Acceleration[0]);
+            addChartValue(0, 1, imuData.Acceleration[1]);
+            addChartValue(0, 2, imuData.Acceleration[2]);
+            addChartValue(1, 0, imuData.AngularVelocity[0]);
+            addChartValue(1, 1, imuData.AngularVelocity[1]);
+            addChartValue(1, 2, imuData.AngularVelocity[2]);
+            addChartValue(2, 0, imuData.EulerAngles[0]);
+            addChartValue(2, 1, imuData.EulerAngles[1]);
+            addChartValue(2, 2, imuData.EulerAngles[2]);
+            addChartValue(3, 0, imuData.Magnetometer[0]);
+            addChartValue(3, 1, imuData.Magnetometer[1]);
+            addChartValue(3, 2, imuData.Magnetometer[2]);
+            m_chartDataVersion++;
+            emit chartDataVersionChanged();
+            emit chartDataChanged();
             break;
         }
         case 0x03: {

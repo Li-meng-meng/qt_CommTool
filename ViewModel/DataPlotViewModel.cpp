@@ -84,6 +84,24 @@ QVariantList DataPlotViewModel::yawValues() const
     return m_yawValues;
 }
 
+QVariantList DataPlotViewModel::mxValues() const
+{
+    QMutexLocker locker(&m_dataMutex);
+    return m_mxValues;
+}
+
+QVariantList DataPlotViewModel::myValues() const
+{
+    QMutexLocker locker(&m_dataMutex);
+    return m_myValues;
+}
+
+QVariantList DataPlotViewModel::mzValues() const
+{
+    QMutexLocker locker(&m_dataMutex);
+    return m_mzValues;
+}
+
 bool DataPlotViewModel::isPaused() const
 {
     return m_isPaused;
@@ -115,7 +133,8 @@ QString DataPlotViewModel::errorMessage() const
 
 void DataPlotViewModel::addDataPoint(qint64 timestamp, float ax, float ay, float az,
                                        float gx, float gy, float gz,
-                                       float roll, float pitch, float yaw)
+                                       float roll, float pitch, float yaw,
+                                       float mx, float my, float mz)
 {
     if (m_isPaused) {
         return;
@@ -139,6 +158,9 @@ void DataPlotViewModel::addDataPoint(qint64 timestamp, float ax, float ay, float
     m_rollValues.append(roll);
     m_pitchValues.append(pitch);
     m_yawValues.append(yaw);
+    m_mxValues.append(mx);
+    m_myValues.append(my);
+    m_mzValues.append(mz);
 
     trimDataLists();
 
@@ -160,6 +182,9 @@ void DataPlotViewModel::onUpdateTimeout()
         m_rollValues = QVariantList(m_rollValues);
         m_pitchValues = QVariantList(m_pitchValues);
         m_yawValues = QVariantList(m_yawValues);
+        m_mxValues = QVariantList(m_mxValues);
+        m_myValues = QVariantList(m_myValues);
+        m_mzValues = QVariantList(m_mzValues);
         locker.unlock();
         emit dataChanged();
     }
@@ -179,6 +204,9 @@ void DataPlotViewModel::clearChart()
     m_rollValues.clear();
     m_pitchValues.clear();
     m_yawValues.clear();
+    m_mxValues.clear();
+    m_myValues.clear();
+    m_mzValues.clear();
     m_startTimestamp = -1;
     m_errorMessage.clear();
     m_pendingDataCount = 0;
@@ -206,7 +234,7 @@ bool DataPlotViewModel::exportChartData(const QString& filePath)
     QTextStream out(&file);
     out.setEncoding(QStringConverter::Utf8);
 
-    out << "Time(s),AX(m/s²),AY(m/s²),AZ(m/s²),GX(°/s),GY(°/s),GZ(°/s),Roll(°),Pitch(°),Yaw(°)\n";
+    out << "Time(s),AX(m/s²),AY(m/s²),AZ(m/s²),GX(°/s),GY(°/s),GZ(°/s),Roll(°),Pitch(°),Yaw(°),MX(uT),MY(uT),MZ(uT)\n";
 
     QMutexLocker locker(&m_dataMutex);
     int count = m_timeValues.size();
@@ -220,7 +248,10 @@ bool DataPlotViewModel::exportChartData(const QString& filePath)
             << m_gzValues[i].toFloat() << ","
             << m_rollValues[i].toFloat() << ","
             << m_pitchValues[i].toFloat() << ","
-            << m_yawValues[i].toFloat() << "\n";
+            << m_yawValues[i].toFloat() << ","
+            << m_mxValues[i].toFloat() << ","
+            << m_myValues[i].toFloat() << ","
+            << m_mzValues[i].toFloat() << "\n";
     }
 
     file.close();
@@ -229,7 +260,7 @@ bool DataPlotViewModel::exportChartData(const QString& filePath)
 
 void DataPlotViewModel::onNewAccelerationData(const AccelerationData& data)
 {
-    addDataPoint(data.timestamp, data.ax, data.ay, data.az, 0, 0, 0, 0, 0, 0);
+    addDataPoint(data.timestamp, data.ax, data.ay, data.az, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 void DataPlotViewModel::onBatchDataParsed(const QList<AccelerationData>& data)
@@ -258,6 +289,9 @@ void DataPlotViewModel::onBatchDataParsed(const QList<AccelerationData>& data)
         m_rollValues.append(0);
         m_pitchValues.append(0);
         m_yawValues.append(0);
+        m_mxValues.append(0);
+        m_myValues.append(0);
+        m_mzValues.append(0);
         batchCount++;
     }
 
@@ -285,5 +319,8 @@ void DataPlotViewModel::trimDataLists()
         m_rollValues.erase(m_rollValues.begin(), m_rollValues.begin() + excess);
         m_pitchValues.erase(m_pitchValues.begin(), m_pitchValues.begin() + excess);
         m_yawValues.erase(m_yawValues.begin(), m_yawValues.begin() + excess);
+        m_mxValues.erase(m_mxValues.begin(), m_mxValues.begin() + excess);
+        m_myValues.erase(m_myValues.begin(), m_myValues.begin() + excess);
+        m_mzValues.erase(m_mzValues.begin(), m_mzValues.begin() + excess);
     }
 }

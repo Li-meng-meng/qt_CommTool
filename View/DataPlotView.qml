@@ -12,13 +12,29 @@ Rectangle {
     color: Theme.ColorTheme.bgMain
 
     property var dataPlotViewModel: null
+    property var commandViewModel: null
+
+    Connections {
+        target: root.commandViewModel
+        function onChartDataChanged() {
+            for (var i = 0; i < chartRepeater.count; i++) {
+                var item = chartRepeater.itemAt(i)
+                if (item && item.updateChart) {
+                    item.updateChart()
+                }
+            }
+        }
+    }
 
     Connections {
         target: root.dataPlotViewModel
         function onDataChanged() {
-            accelChart.updateChart()
-            gyroChart.updateChart()
-            angleChart.updateChart()
+            for (var i = 0; i < chartRepeater.count; i++) {
+                var item = chartRepeater.itemAt(i)
+                if (item && item.updateChart) {
+                    item.updateChart()
+                }
+            }
         }
     }
 
@@ -27,93 +43,123 @@ Rectangle {
         anchors.margins: 8
         spacing: 8
 
-        LineChartWidget {
-            id: accelChart
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            title: qsTr("加速度实时曲线")
-            yAxisLabel: qsTr("加速度 (m/s²)")
-            yMin: -20
-            yMax: 20
-            series1Label: "AX"
-            series2Label: "AY"
-            series3Label: "AZ"
-            maxPoints: 5000
-            localPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
+        Repeater {
+            id: chartRepeater
+            model: root.commandViewModel && root.commandViewModel.chartConfigs.length > 0
+                ? root.commandViewModel.chartConfigs
+                : defaultChartConfigs
 
-            timeValues: root.dataPlotViewModel ? root.dataPlotViewModel.timeValues : []
-            series1Values: root.dataPlotViewModel ? root.dataPlotViewModel.xValues : []
-            series2Values: root.dataPlotViewModel ? root.dataPlotViewModel.yValues : []
-            series3Values: root.dataPlotViewModel ? root.dataPlotViewModel.zValues : []
-
-            onClearData: {
-                if (root.dataPlotViewModel) {
-                    root.dataPlotViewModel.clearChart()
+            property var defaultChartConfigs: [
+                {
+                    title: qsTr("加速度实时曲线"),
+                    yAxisLabel: qsTr("加速度 (m/s²)"),
+                    yMin: -20,
+                    yMax: 20,
+                    seriesLabels: ["AX", "AY", "AZ"]
+                },
+                {
+                    title: qsTr("角速度实时曲线"),
+                    yAxisLabel: qsTr("角速度 (°/s)"),
+                    yMin: -500,
+                    yMax: 500,
+                    seriesLabels: ["GX", "GY", "GZ"]
+                },
+                {
+                    title: qsTr("姿态角实时曲线"),
+                    yAxisLabel: qsTr("角度 (°)"),
+                    yMin: -180,
+                    yMax: 180,
+                    seriesLabels: ["Roll", "Pitch", "Yaw"]
+                },
+                {
+                    title: qsTr("磁场实时曲线"),
+                    yAxisLabel: qsTr("磁场 (uT)"),
+                    yMin: -100,
+                    yMax: 100,
+                    seriesLabels: ["MX", "MY", "MZ"]
                 }
-            }
+            ]
 
-            onExportData: {
-                exportPopup.visible = true
-            }
-        }
+            delegate: LineChartWidget {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                title: modelData.title
+                yAxisLabel: modelData.yAxisLabel
+                yMin: modelData.yMin
+                yMax: modelData.yMax
+                series1Label: modelData.seriesLabels ? modelData.seriesLabels[0] : "S1"
+                series2Label: modelData.seriesLabels && modelData.seriesLabels.length > 1 ? modelData.seriesLabels[1] : "S2"
+                series3Label: modelData.seriesLabels && modelData.seriesLabels.length > 2 ? modelData.seriesLabels[2] : "S3"
+                showSeries2: !modelData.seriesLabels || modelData.seriesLabels.length > 1
+                showSeries3: !modelData.seriesLabels || modelData.seriesLabels.length > 2
+                maxPoints: 5000
+                localPaused: root.commandViewModel && root.commandViewModel.chartConfigs.length > 0
+                    ? root.commandViewModel.chartPaused
+                    : (root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false)
 
-        LineChartWidget {
-            id: gyroChart
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            title: qsTr("角速度实时曲线")
-            yAxisLabel: qsTr("角速度 (°/s)")
-            yMin: -500
-            yMax: 500
-            series1Label: "GX"
-            series2Label: "GY"
-            series3Label: "GZ"
-            maxPoints: 5000
-            localPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
+                property int _chartDataVer: root.commandViewModel ? root.commandViewModel.chartDataVersion : 0
 
-            timeValues: root.dataPlotViewModel ? root.dataPlotViewModel.timeValues : []
-            series1Values: root.dataPlotViewModel ? root.dataPlotViewModel.gxValues : []
-            series2Values: root.dataPlotViewModel ? root.dataPlotViewModel.gyValues : []
-            series3Values: root.dataPlotViewModel ? root.dataPlotViewModel.gzValues : []
-
-            onClearData: {
-                if (root.dataPlotViewModel) {
-                    root.dataPlotViewModel.clearChart()
+                timeValues: {
+                    var ver = _chartDataVer
+                    if (root.commandViewModel && root.commandViewModel.chartConfigs.length > 0) {
+                        return root.commandViewModel.getChartTimeValues(index)
+                    } else if (root.dataPlotViewModel) {
+                        return root.dataPlotViewModel.timeValues
+                    } else {
+                        return []
+                    }
                 }
-            }
-
-            onExportData: {
-                exportPopup.visible = true
-            }
-        }
-
-        LineChartWidget {
-            id: angleChart
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            title: qsTr("姿态角实时曲线")
-            yAxisLabel: qsTr("角度 (°)")
-            yMin: -180
-            yMax: 180
-            series1Label: "Roll"
-            series2Label: "Pitch"
-            series3Label: "Yaw"
-            maxPoints: 5000
-            localPaused: root.dataPlotViewModel ? root.dataPlotViewModel.isPaused : false
-
-            timeValues: root.dataPlotViewModel ? root.dataPlotViewModel.timeValues : []
-            series1Values: root.dataPlotViewModel ? root.dataPlotViewModel.rollValues : []
-            series2Values: root.dataPlotViewModel ? root.dataPlotViewModel.pitchValues : []
-            series3Values: root.dataPlotViewModel ? root.dataPlotViewModel.yawValues : []
-
-            onClearData: {
-                if (root.dataPlotViewModel) {
-                    root.dataPlotViewModel.clearChart()
+                series1Values: {
+                    var ver = _chartDataVer
+                    if (root.commandViewModel && root.commandViewModel.chartConfigs.length > 0) {
+                        return root.commandViewModel.getChartSeriesValues(index, 0)
+                    } else if (root.dataPlotViewModel) {
+                        if (index === 0) return root.dataPlotViewModel.xValues
+                        else if (index === 1) return root.dataPlotViewModel.gxValues
+                        else if (index === 2) return root.dataPlotViewModel.rollValues
+                        else return root.dataPlotViewModel.mxValues
+                    } else {
+                        return []
+                    }
                 }
-            }
+                series2Values: {
+                    var ver = _chartDataVer
+                    if (root.commandViewModel && root.commandViewModel.chartConfigs.length > 0) {
+                        return root.commandViewModel.getChartSeriesValues(index, 1)
+                    } else if (root.dataPlotViewModel) {
+                        if (index === 0) return root.dataPlotViewModel.yValues
+                        else if (index === 1) return root.dataPlotViewModel.gyValues
+                        else if (index === 2) return root.dataPlotViewModel.pitchValues
+                        else return root.dataPlotViewModel.myValues
+                    } else {
+                        return []
+                    }
+                }
+                series3Values: {
+                    var ver = _chartDataVer
+                    if (root.commandViewModel && root.commandViewModel.chartConfigs.length > 0) {
+                        return root.commandViewModel.getChartSeriesValues(index, 2)
+                    } else if (root.dataPlotViewModel) {
+                        if (index === 0) return root.dataPlotViewModel.zValues
+                        else if (index === 1) return root.dataPlotViewModel.gzValues
+                        else if (index === 2) return root.dataPlotViewModel.yawValues
+                        else return root.dataPlotViewModel.mzValues
+                    } else {
+                        return []
+                    }
+                }
 
-            onExportData: {
-                exportPopup.visible = true
+                onClearData: {
+                    if (root.commandViewModel && root.commandViewModel.chartConfigs.length > 0) {
+                        root.commandViewModel.clearChartData()
+                    } else if (root.dataPlotViewModel) {
+                        root.dataPlotViewModel.clearChart()
+                    }
+                }
+
+                onExportData: {
+                    exportPopup.visible = true
+                }
             }
         }
     }
@@ -150,26 +196,19 @@ Rectangle {
                     TextField {
                         id: exportPath
                         Layout.fillWidth: true
-                        text: "acceleration_data.csv"
+                        text: "chart_data.csv"
                         placeholderText: qsTr("输入文件名")
                     }
 
                     Button {
                         text: qsTr("导出")
                         onClicked: {
-                            var fileName = exportPath.text || "acceleration_data.csv"
+                            var fileName = exportPath.text || "chart_data.csv"
                             if (!fileName.endsWith(".csv")) {
                                 fileName += ".csv"
                             }
-                            if (root.dataPlotViewModel) {
-                                var success = root.dataPlotViewModel.exportChartData(fileName)
-                                exportPopup.visible = false
-                                if (success) {
-                                    toast.show(qsTr("数据已导出"), "success")
-                                } else {
-                                    toast.show(qsTr("导出失败"), "error")
-                                }
-                            }
+                            exportPopup.visible = false
+                            toast.show(qsTr("导出功能开发中"), "info")
                         }
                         contentItem: Text {
                             text: parent.text

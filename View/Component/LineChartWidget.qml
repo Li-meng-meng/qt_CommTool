@@ -210,7 +210,13 @@ Rectangle {
         if (root.localPaused) return
 
         var dataCount = root.timeValues.length
-        if (dataCount === 0) return
+        if (dataCount === 0) {
+            series1.clear()
+            series2.clear()
+            series3.clear()
+            root.lastUpdateIndex = -1
+            return
+        }
 
         var range = graphsView.updateVisibleRange()
         var startIndex = 0

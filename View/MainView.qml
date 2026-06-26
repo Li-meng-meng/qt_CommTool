@@ -142,6 +142,7 @@ Window {
                 DataPlotView {
                     anchors.fill: parent
                     dataPlotViewModel: commViewModel.dataPlotViewModel
+                    commandViewModel: commViewModel.commandViewModel
                     toast: toast
                 }
             }

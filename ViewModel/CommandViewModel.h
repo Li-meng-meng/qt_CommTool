@@ -18,6 +18,9 @@ class CommandViewModel : public QObject
     Q_PROPERTY(QString receivedDataText READ receivedDataText NOTIFY receivedDataTextChanged)
     Q_PROPERTY(int selectedOp READ selectedOp WRITE setSelectedOp NOTIFY selectedOpChanged)
     Q_PROPERTY(int selectedData1 READ selectedData1 WRITE setSelectedData1 NOTIFY selectedData1Changed)
+    Q_PROPERTY(QVariantList chartConfigs READ chartConfigs NOTIFY chartConfigsChanged)
+    Q_PROPERTY(bool chartPaused READ chartPaused WRITE setChartPaused NOTIFY chartPausedChanged)
+    Q_PROPERTY(int chartDataVersion READ chartDataVersion NOTIFY chartDataVersionChanged)
 
 public:
     explicit CommandViewModel(QObject *parent = nullptr);
@@ -30,10 +33,17 @@ public:
     QString receivedDataText() const;
     int selectedOp() const;
     int selectedData1() const;
+    QVariantList chartConfigs() const;
 
     Q_INVOKABLE void generateHex();
     Q_INVOKABLE void copyHex();
     Q_INVOKABLE void clearReceivedHex();
+    Q_INVOKABLE QVariantList getChartTimeValues(int chartIndex) const;
+    Q_INVOKABLE QVariantList getChartSeriesValues(int chartIndex, int seriesIndex) const;
+    Q_INVOKABLE void clearChartData();
+    Q_INVOKABLE void setChartPaused(bool paused);
+    Q_INVOKABLE bool chartPaused() const;
+    Q_INVOKABLE int chartDataVersion() const;
 
 public slots:
     void sendCommand(quint8 cmd, quint8 id);
@@ -53,11 +63,17 @@ signals:
     void selectedOpChanged();
     void selectedData1Changed();
     void hexCopied();
+    void chartConfigsChanged();
+    void chartDataChanged();
+    void chartDataVersionChanged();
+    void chartPausedChanged(bool paused);
 
 private:
     void initCommandGroups();
     QByteArray buildPayload(quint8 cmd, quint8 id);
     void flushReceiveBuffer();
+    void updateChartConfigs();
+    void addChartValue(int chartIndex, int seriesIndex, float value, float timeOffset = 0);
 
     QVariantList m_commandGroups;
     QVariantMap m_selectedCommand;
@@ -71,6 +87,13 @@ private:
     bool m_hexdDirty;
     int m_selectedOp = 0;
     int m_selectedData1 = 0;
+    bool m_chartPaused = false;
+    qint64 m_chartStartTime = 0;
+    int m_maxChartPoints = 5000;
+    int m_chartDataVersion = 0;
+    QVariantList m_chartConfigs;
+    QList<QVariantList> m_chartTimeLists;
+    QList<QList<QVariantList>> m_chartSeriesLists;
 
     QTimer* m_flushTimer;
 };

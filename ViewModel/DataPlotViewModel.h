@@ -22,6 +22,9 @@ class DataPlotViewModel : public QObject
     Q_PROPERTY(QVariantList rollValues READ rollValues NOTIFY dataChanged)
     Q_PROPERTY(QVariantList pitchValues READ pitchValues NOTIFY dataChanged)
     Q_PROPERTY(QVariantList yawValues READ yawValues NOTIFY dataChanged)
+    Q_PROPERTY(QVariantList mxValues READ mxValues NOTIFY dataChanged)
+    Q_PROPERTY(QVariantList myValues READ myValues NOTIFY dataChanged)
+    Q_PROPERTY(QVariantList mzValues READ mzValues NOTIFY dataChanged)
     Q_PROPERTY(bool isPaused READ isPaused NOTIFY isPausedChanged)
     Q_PROPERTY(bool isViewActive READ isViewActive WRITE setViewActive NOTIFY isViewActiveChanged)
     Q_PROPERTY(QString errorMessage READ errorMessage NOTIFY errorOccurred)
@@ -40,6 +43,9 @@ public:
     QVariantList rollValues() const;
     QVariantList pitchValues() const;
     QVariantList yawValues() const;
+    QVariantList mxValues() const;
+    QVariantList myValues() const;
+    QVariantList mzValues() const;
 
     bool isPaused() const;
     bool isViewActive() const;
@@ -50,7 +56,8 @@ public:
 public slots:
     void addDataPoint(qint64 timestamp, float ax, float ay, float az,
                       float gx, float gy, float gz,
-                      float roll, float pitch, float yaw);
+                      float roll, float pitch, float yaw,
+                      float mx, float my, float mz);
     void clearChart();
     void setPaused(bool paused);
     bool exportChartData(const QString& filePath);
@@ -80,6 +87,9 @@ private:
     QVariantList m_rollValues;
     QVariantList m_pitchValues;
     QVariantList m_yawValues;
+    QVariantList m_mxValues;
+    QVariantList m_myValues;
+    QVariantList m_mzValues;
 
     bool m_isPaused;
     bool m_isViewActive;
