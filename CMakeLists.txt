@@ -30,6 +30,7 @@ qt_add_executable(CommTool
     ViewModel/CommViewModel.cpp
     ViewModel/DataPlotViewModel.cpp
     ViewModel/MainViewModel.cpp
+    ViewModel/CommandViewModel.cpp
     Help/CommImpl.cpp
     Help/DataParser.cpp
     Help/crc.cpp
@@ -46,6 +47,7 @@ qt_add_qml_module(CommTool
         View/SettingView.qml
         View/HelpView.qml
         View/AppSettingsDialog.qml
+        View/CommandMenuView.qml
         View/CommonToolView/SerialSettingView.qml
         View/Component/LineChartWidget.qml
         View/Component/Button.qml
@@ -62,6 +64,8 @@ qt_add_qml_module(CommTool
         ViewModel/MainViewModel.cpp
         ViewModel/AppSettingsViewModel.h
         ViewModel/AppSettingsViewModel.cpp
+        ViewModel/CommandViewModel.h
+        ViewModel/CommandViewModel.cpp
         Help/CommImpl.h
         Help/CommImpl.cpp
         Help/DataParser.h

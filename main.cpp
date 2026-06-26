@@ -5,6 +5,7 @@
 #include "ViewModel/DataPlotViewModel.h"
 #include "ViewModel/MainViewModel.h"
 #include "ViewModel/AppSettingsViewModel.h"
+#include "ViewModel/CommandViewModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<DataPlotViewModel>("CommTool.ViewModel", 1, 0, "DataPlotViewModel");
     qmlRegisterType<MainViewModel>("CommTool.ViewModel", 1, 0, "MainViewModel");
     qmlRegisterType<AppSettingsViewModel>("CommTool.ViewModel", 1, 0, "AppSettingsViewModel");
+    qmlRegisterType<CommandViewModel>("CommTool.ViewModel", 1, 0, "CommandViewModel");
 
     QQmlApplicationEngine engine;
     const QUrl url(u"qrc:/CommTool/View/MainView.qml"_qs);

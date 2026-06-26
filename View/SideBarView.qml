@@ -157,6 +157,27 @@ Rectangle {
         }
 
         Button {
+            id: commandBtn
+            text: qsTr("Commands")
+            Layout.fillWidth: true
+            onClicked: root.switchToCommand()
+            contentItem: Text {
+                text: commandBtn.text
+                color: Theme.ColorTheme.btnNormalText
+                font.family: "Roboto"
+                font.pointSize: 12
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle {
+                color: Theme.ColorTheme.btnNormal
+                border.width: 1
+                border.color: Theme.ColorTheme.btnNormalBorder
+                radius: 4
+            }
+        }
+
+        Button {
             id: settingsBtn
             text: qsTr("Settings")
             Layout.fillWidth: true
@@ -180,5 +201,6 @@ Rectangle {
 
     signal switchToSerial()
     signal switchToDataPlot()
+    signal switchToCommand()
     signal openSettings()
 }

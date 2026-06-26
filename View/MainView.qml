@@ -58,6 +58,9 @@ Window {
                 commViewModel.isPlotViewActive = true
                 commViewModel.dataPlotViewModel.isViewActive = true
             }
+            onSwitchToCommand: {
+                root.currentPage = 2
+            }
             onSwitchToSerial: {
                 root.currentPage = 0
                 commViewModel.isPlotViewActive = false
@@ -135,6 +138,18 @@ Window {
                     anchors.fill: parent
                     dataPlotViewModel: commViewModel.dataPlotViewModel
                     toast: toast
+                }
+            }
+
+            // Command Page
+            Item {
+                id: commandPage
+                visible: root.currentPage === 2
+                anchors.fill: parent
+
+                CommandMenuView {
+                    anchors.fill: parent
+                    viewModel: commViewModel.commandViewModel
                 }
             }
         }

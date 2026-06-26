@@ -9,6 +9,7 @@
 #include "../CommModelLib/Common/EnumComm.h"
 #include "DataParser.h"
 #include "DataPlotViewModel.h"
+#include "CommandViewModel.h"
 
 class CommViewModel : public QObject
 {
@@ -30,6 +31,7 @@ class CommViewModel : public QObject
     Q_PROPERTY(bool isPlotViewActive READ getIsPlotViewActive WRITE setIsPlotViewActive NOTIFY isPlotViewActiveChanged)
     Q_PROPERTY(bool isShowViewActive READ getIsShowViewActive WRITE setIsShowViewActive NOTIFY isShowViewActiveChanged)
     Q_PROPERTY(QObject* dataPlotViewModel READ getDataPlotViewModel CONSTANT)
+    Q_PROPERTY(QObject* commandViewModel READ getCommandViewModel CONSTANT)
 
 public:
     explicit CommViewModel(QObject *parent = nullptr);
@@ -69,6 +71,7 @@ public:
     void setIsShowViewActive(bool active);
 
     DataPlotViewModel* getDataPlotViewModel() const;
+    CommandViewModel* getCommandViewModel() const;
 
 public slots:
     void openSerialPort(const QString& portName, int baudRate, int dataBits, int parity, int stopBits, int flowControl);
@@ -138,6 +141,7 @@ private:
 
     DataParser* m_dataParser;
     DataPlotViewModel* m_dataPlotViewModel;
+    CommandViewModel* m_commandViewModel;
 };
 
 #endif // COMMVIEWMODEL_H

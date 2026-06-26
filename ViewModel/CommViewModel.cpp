@@ -17,6 +17,7 @@ CommViewModel::CommViewModel(QObject *parent)
     , m_isShowViewActive(true)
     , m_dataParser(new DataParser(this))
     , m_dataPlotViewModel(new DataPlotViewModel(this))
+    , m_commandViewModel(new CommandViewModel(this))
 {
     // 串口信号连接
     connect(&m_serial, &SerialService::sigConnectStateChanged,
@@ -39,6 +40,11 @@ CommViewModel::CommViewModel(QObject *parent)
         this, &CommViewModel::onNewAllData);
     connect(m_dataParser, &DataParser::parseError,
         this, &CommViewModel::onParseError);
+
+    connect(m_commandViewModel, &CommandViewModel::sendDataRequested,
+        this, [this](const QByteArray& data) {
+            m_serial.sendData(data);
+        });
 
     refreshPortList();
 }
@@ -216,6 +222,11 @@ void CommViewModel::setIsShowViewActive(bool active)
 DataPlotViewModel* CommViewModel::getDataPlotViewModel() const
 {
     return m_dataPlotViewModel;
+}
+
+CommandViewModel* CommViewModel::getCommandViewModel() const
+{
+    return m_commandViewModel;
 }
 
 void CommViewModel::openSerialPort(const QString& portName, int baudRate, int dataBits, int parity, int stopBits, int flowControl)
