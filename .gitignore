@@ -1,9 +1,25 @@
+# Build directories
 build/
 build_msvc/
-*.user
-*.suo
-*.pro.user
+build_*/
+deploy/
+
+# Qt / CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+.qmake.stash
+*.qbs.user
+*.qbs
 Makefile
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+*.moc
+*.autosave
+
+# Compiled object files
 *.o
 *.obj
 *.exe
@@ -13,12 +29,32 @@ Makefile
 *.pdb
 *.ilk
 *.manifest
-.qmake.stash
-*.qbs.user
-*.qbs
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-install_manifest.txt
+*.res
+*.rcc
+
+# Visual Studio
 *.vcxproj.user
 *.filters
+*.suo
+*.sdf
+*.opensdf
+*.opendb
+.vs/
+ipch/
+x64/
+x86/
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+
+# VS Code
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Project-specific
+.trae/
+例子/

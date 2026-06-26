@@ -25,7 +25,7 @@ target_link_libraries(CommModelLib PRIVATE
     Qt6::SerialPort
 )
 
-qt_add_executable(CommTool
+qt_add_executable(CommTool WIN32
     main.cpp
     ViewModel/CommViewModel.cpp
     ViewModel/DataPlotViewModel.cpp
