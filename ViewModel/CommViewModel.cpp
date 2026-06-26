@@ -52,6 +52,9 @@ CommViewModel::CommViewModel(QObject *parent)
             m_serial.sendData(data);
         });
 
+    connect(m_dataParser, &DataParser::newReceivedData,
+        m_commandViewModel, &CommandViewModel::handleReceivedData);
+
     refreshPortList();
 }
 

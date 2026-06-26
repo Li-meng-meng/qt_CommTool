@@ -412,12 +412,12 @@ Rectangle {
         }
 
         // ===========================
-        // 参数说明
+        // 接收数据
         // ===========================
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 120
-            Layout.minimumHeight: 120
+            Layout.preferredHeight: 200
+            Layout.minimumHeight: 200
 
             color: Theme.ColorTheme.bgMain
             radius: 4
@@ -431,7 +431,7 @@ Rectangle {
                 spacing: 8
 
                 Text {
-                    text: "参数说明"
+                    text: "接收数据"
                     font.bold: true
                     font.pixelSize: 12
                     color: Theme.ColorTheme.textMain
@@ -447,20 +447,25 @@ Rectangle {
                     border.color: Theme.ColorTheme.border
                     border.width: 1
 
-                    Text {
+                    ScrollView {
                         anchors.fill: parent
-                        anchors.margins: 10
+                        anchors.margins: 8
 
-                        text: viewModel
-                              && viewModel.selectedCommand
-                              && viewModel.selectedCommand["description"] !== undefined
-                              ? viewModel.selectedCommand["description"]
-                              : "请选择命令"
+                        Text {
+                            text: viewModel
+                                  && viewModel.receivedDataText
+                                  && viewModel.receivedDataText.length > 0
+                                  ? viewModel.receivedDataText
+                                  : "等待接收数据..."
 
-                        color: Theme.ColorTheme.textSub
+                            color: Theme.ColorTheme.textSub
 
-                        wrapMode: Text.WordWrap
-                        verticalAlignment: Text.AlignTop
+                            wrapMode: Text.WordWrap
+                            verticalAlignment: Text.AlignTop
+
+                            font.family: "Consolas"
+                            font.pixelSize: 12
+                        }
                     }
                 }
             }
@@ -563,10 +568,37 @@ Rectangle {
                 anchors.margins: 10
                 spacing: 8
 
-                Text {
-                    text: "HEX结果"
-                    font.bold: true
-                    color: Theme.ColorTheme.textMain
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: "HEX结果"
+                        font.bold: true
+                        color: Theme.ColorTheme.textMain
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+
+                    Button {
+                        text: "清除"
+                        onClicked: viewModel.clearReceivedHex()
+                        contentItem: Text {
+                            text: parent.text
+                            color: Theme.ColorTheme.btnNormalText
+                            font.family: "Roboto"
+                            font.pointSize: 11
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        background: Rectangle {
+                            color: parent.pressed ? Theme.ColorTheme.btnNormalHover : Theme.ColorTheme.btnNormal
+                            border.width: 1
+                            border.color: Theme.ColorTheme.btnNormalBorder
+                            radius: 4
+                        }
+                    }
                 }
 
                 Rectangle {
@@ -585,7 +617,7 @@ Rectangle {
 
                         TextArea {
                             text: viewModel
-                                  ? viewModel.generatedHex
+                                  ? viewModel.receivedHex
                                   : ""
 
                             readOnly: true

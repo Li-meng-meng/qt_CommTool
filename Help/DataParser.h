@@ -160,6 +160,7 @@ signals:
     void newSensorDataPacket(const SensorDataPacket& data);
     void newStatusData(const StatusPacket& data);
     void newAllData(const AllDataPacket& data);
+    void newReceivedData(quint8 cmd, quint8 id, const QByteArray& data);
     void parseError(const QString& error);
 
 private slots:

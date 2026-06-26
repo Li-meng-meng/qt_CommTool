@@ -46,6 +46,7 @@ void DataParser::user_unpack_data_fun(const QByteArray& buf, quint16 len)
         if ((user_head_temp.cmd == user_comm_callbak[i].cmd) &&
             (user_head_temp.id == user_comm_callbak[i].id)) {
             user_comm_callbak[i].fun(buf, len);
+            emit s_instance->newReceivedData(user_head_temp.cmd, user_head_temp.id, buf);
             return;
         }
     }
