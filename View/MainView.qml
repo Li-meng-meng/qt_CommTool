@@ -17,10 +17,10 @@ Window {
 
     CommViewModel {
         id: commViewModel
-        onConnectStateChanged: {
-            if (state === 2) {
+        onConnectStateChanged: function(newState) {
+            if (newState === 2) {
                 toast.show("串口已打开", "success")
-            } else if (state === 0) {
+            } else if (newState === 0) {
                 toast.show("串口已关闭", "info")
             }
         }

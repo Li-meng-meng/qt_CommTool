@@ -9,7 +9,6 @@ Rectangle {
     height: parent.height
     color: Theme.ColorTheme.bgMain
 
-    property real globalMargin: 16
     property real layoutSpacing: 12
     property real gridCellSpacing: 10
     property real labelMinWidth: 72
@@ -18,7 +17,10 @@ Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: globalMargin
+        anchors.topMargin: 32
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16
         spacing: layoutSpacing
 
         // 设备列表
@@ -163,25 +165,6 @@ Rectangle {
                     border.color: notifyCharUuidField.activeFocus ? Theme.ColorTheme.btnPrimary : Theme.ColorTheme.border
                     radius: 4
                 }
-            }
-
-            // 连接状态
-            Label {
-                text: qsTr("状态:")
-                color: Theme.ColorTheme.textSub
-                font.family: "Roboto"
-                Layout.minimumWidth: labelMinWidth
-                Layout.alignment: Qt.AlignVCenter
-            }
-            Label {
-                id: stateLabel
-                Layout.fillWidth: true
-                text: root.connectState === 2 ? qsTr("已连接") :
-                      root.connectState === 1 ? qsTr("连接中") : qsTr("未连接")
-                color: root.connectState === 2 ? Theme.ColorTheme.btnSuccess :
-                       root.connectState === 1 ? Theme.ColorTheme.btnWarning : Theme.ColorTheme.textSub
-                font.family: "Roboto"
-                font.pointSize: 12
             }
 
             // 连接/断开按钮
