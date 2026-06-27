@@ -42,33 +42,33 @@ Rectangle {
         Button {
             id: bluetoothBtn
             text: qsTr("Bluetooth")
-            buttonType: "normal"
+            buttonType: "primary"
             Layout.fillWidth: true
-            enabled: false
+            onClicked: root.switchToBluetooth()
         }
 
         Button {
             id: wifiBtn
             text: qsTr("WiFi")
-            buttonType: "normal"
+            buttonType: "primary"
             Layout.fillWidth: true
-            enabled: false
+            visible: false
         }
 
         Button {
             id: mqttBtn
             text: qsTr("MQTT")
-            buttonType: "normal"
+            buttonType: "primary"
             Layout.fillWidth: true
-            enabled: false
+            visible: false
         }
 
         Button {
             id: httpBtn
             text: qsTr("HTTP")
-            buttonType: "normal"
+            buttonType: "primary"
             Layout.fillWidth: true
-            enabled: false
+            visible: false
         }
 
         Item { Layout.fillHeight: true }
@@ -99,6 +99,7 @@ Rectangle {
     }
 
     signal switchToSerial()
+    signal switchToBluetooth()
     signal switchToDataPlot()
     signal switchToCommand()
     signal openSettings()

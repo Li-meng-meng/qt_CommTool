@@ -21,56 +21,61 @@ Rectangle {
             spacing: 8
 
             Rectangle {
-            width: 12
-            height: 12
-            radius: 6
-            color: root.connectState === 2 ? Theme.ColorTheme.textSuccess : Theme.ColorTheme.textDisabled
-        }
+                width: 12
+                height: 12
+                radius: 6
+                color: root.connectState === 2 ? Theme.ColorTheme.textSuccess : Theme.ColorTheme.textDisabled
+            }
 
-        Text {
-            text: root.connectState === 2 ? qsTr("已连接") : qsTr("未连接")
-            color: root.connectState === 2 ? Theme.ColorTheme.textSuccess : Theme.ColorTheme.textDisabled
-            font.family: "Roboto"
-            font.pointSize: 12
-        }
+            Text {
+                text: root.connectState === 2 ? qsTr("已连接") : qsTr("未连接")
+                color: root.connectState === 2 ? Theme.ColorTheme.textSuccess : Theme.ColorTheme.textDisabled
+                font.family: "Roboto"
+                font.pointSize: 12
+            }
         }
 
         SerialSettingView {
+            id: serialSetting
             Layout.fillWidth: true
             Layout.fillHeight: true
+            visible: root.currentCommType === "serial"
 
-            portName: root.portName
-            baudRate: root.baudRate
             portList: root.portList
             connectState: root.connectState
-            dataBits: root.dataBits
-            parity: root.parity
-            stopBits: root.stopBits
-            flowControl: root.flowControl
 
             onOpenPort: root.openPort(portName, baudRate, dataBits, parity, stopBits, flowControl)
             onClosePort: root.closePort()
             onRefreshPorts: root.refreshPorts()
+        }
 
-            onPortNameChanged: root.portName = portName
-            onBaudRateChanged: root.baudRate = baudRate
-            onDataBitsChanged: root.dataBits = dataBits
-            onParityChanged: root.parity = parity
-            onStopBitsChanged: root.stopBits = stopBits
-            onFlowControlChanged: root.flowControl = flowControl
+        BluetoothSettingView {
+            id: bluetoothSetting
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: root.currentCommType === "bluetooth"
+
+            deviceList: root.bluetoothDeviceList
+            isScanning: root.isScanning
+            connectState: root.connectState
+
+            onStartScan: root.startScan()
+            onStopScan: root.stopScan()
+            onOpenPort: root.openBluetoothPort(deviceAddress, serviceUuid, writeCharUuid, notifyCharUuid)
+            onClosePort: root.closePort()
         }
     }
 
-    property string portName: ""
-    property int baudRate: 0
     property var portList: []
+    property var bluetoothDeviceList: []
+    property bool isScanning: false
     property int connectState: 0
-    property int dataBits: 8
-    property int parity: 0
-    property int stopBits: 0
-    property int flowControl: 0
+    property string currentCommType: "serial"
 
     signal openPort(string portName, int baudRate, int dataBits, int parity, int stopBits, int flowControl)
+    signal openBluetoothPort(string deviceAddress, string serviceUuid, string writeCharUuid, string notifyCharUuid)
     signal closePort()
     signal refreshPorts()
+    signal startScan()
+    signal stopScan()
 }

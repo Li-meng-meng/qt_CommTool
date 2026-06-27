@@ -54,6 +54,7 @@ void CommImpl::clear()
 
 void CommImpl::onParseLoop()
 {
+    qDebug() << "[CommImpl] Parse thread started, waiting for data...";
     while (true) {
         quint8 dat = 0;
         bool hasData = false;

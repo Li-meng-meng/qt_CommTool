@@ -28,12 +28,16 @@ target_link_libraries(CommModelLib PRIVATE
     Qt6::Bluetooth
 )
 
-qt_add_executable(CommTool WIN32
+qt_add_executable(CommTool
     main.cpp
     ViewModel/CommViewModel.cpp
     ViewModel/DataPlotViewModel.cpp
     ViewModel/MainViewModel.cpp
     ViewModel/CommandViewModel.cpp
+    ViewModel/Comm/CommHandler.cpp
+    ViewModel/Comm/SerialCommHandler.cpp
+    ViewModel/Comm/BluetoothCommHandler.cpp
+    ViewModel/Comm/CommManager.cpp
     Help/CommImpl.cpp
     Help/DataParser.cpp
     Help/crc.cpp
@@ -52,6 +56,7 @@ qt_add_qml_module(CommTool
         View/AppSettingsDialog.qml
         View/CommandMenuView.qml
         View/CommonToolView/SerialSettingView.qml
+        View/CommonToolView/BluetoothSettingView.qml
         View/Component/LineChartWidget.qml
         View/Component/Button.qml
         View/Component/ChartStatusOverlay.qml
@@ -69,6 +74,14 @@ qt_add_qml_module(CommTool
         ViewModel/AppSettingsViewModel.cpp
         ViewModel/CommandViewModel.h
         ViewModel/CommandViewModel.cpp
+        ViewModel/Comm/CommHandler.h
+        ViewModel/Comm/CommHandler.cpp
+        ViewModel/Comm/SerialCommHandler.h
+        ViewModel/Comm/SerialCommHandler.cpp
+        ViewModel/Comm/BluetoothCommHandler.h
+        ViewModel/Comm/BluetoothCommHandler.cpp
+        ViewModel/Comm/CommManager.h
+        ViewModel/Comm/CommManager.cpp
         Help/CommImpl.h
         Help/CommImpl.cpp
         Help/DataParser.h
@@ -80,6 +93,7 @@ qt_add_qml_module(CommTool
 target_include_directories(CommTool PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/ViewModel
+    ${CMAKE_CURRENT_SOURCE_DIR}/ViewModel/Comm
     ${CMAKE_CURRENT_SOURCE_DIR}/Help
     ${CMAKE_CURRENT_SOURCE_DIR}/CommModelLib
 )
@@ -90,6 +104,7 @@ target_link_libraries(CommTool PRIVATE
     Qt6::QuickControls2
     Qt6::Graphs
     Qt6::SerialPort
+    Qt6::Bluetooth
     CommModelLib
 )
 

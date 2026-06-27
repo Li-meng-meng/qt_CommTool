@@ -1,4 +1,6 @@
 #include "CommViewModel.h"
+#include "Comm/SerialCommHandler.h"
+#include "Comm/BluetoothCommHandler.h"
 #include <QRegularExpression>
 #include <QDateTime>
 #include <QDebug>
@@ -6,11 +8,6 @@
 
 CommViewModel::CommViewModel(QObject *parent)
     : QObject(parent)
-    , m_baudRate(9600)
-    , m_dataBits(8)
-    , m_parity(0)
-    , m_stopBits(0)
-    , m_flowControl(0)
     , m_hexDisplay(true)
     , m_hexSend(true)
     , m_parseEnabled(true)
@@ -18,21 +15,28 @@ CommViewModel::CommViewModel(QObject *parent)
     , m_isShowViewActive(true)
     , m_receiveBufferDirty(false)
     , m_receiveFlushTimer(new QTimer(this))
+    , m_commManager(new CommManager(this))
     , m_dataParser(new DataParser(this))
     , m_dataPlotViewModel(new DataPlotViewModel(this))
     , m_commandViewModel(new CommandViewModel(this))
 {
+    m_commManager->registerHandler(new SerialCommHandler(this));
+    m_commManager->registerHandler(new BluetoothCommHandler(this));
+
     connect(m_receiveFlushTimer, &QTimer::timeout,
         this, &CommViewModel::flushReceiveBuffer);
     m_receiveFlushTimer->setInterval(100);
     m_receiveFlushTimer->start();
 
-    connect(&m_serial, &SerialService::sigConnectStateChanged,
+    qDebug() << "[CommViewModel] connecting CommManager signals";
+    connect(m_commManager, &CommManager::connectStateChanged,
         this, &CommViewModel::onStateChanged);
-    connect(&m_serial, &SerialService::sigRecvData,
+    connect(m_commManager, &CommManager::dataReceived,
         this, &CommViewModel::onRecvData);
-    connect(&m_serial, &SerialService::sigErrorOccurred,
+    connect(m_commManager, &CommManager::errorOccurred,
         this, &CommViewModel::onErrorOccurred);
+    qDebug() << "[CommViewModel] CommManager signals connected";
+    qDebug() << "[CommViewModel] currentHandler registered:" << m_commManager->getAvailableTypes();
 
     connect(m_dataParser, &DataParser::newAccelData,
         this, &CommViewModel::onNewAccelData);
@@ -49,103 +53,25 @@ CommViewModel::CommViewModel(QObject *parent)
 
     connect(m_commandViewModel, &CommandViewModel::sendDataRequested,
         this, [this](const QByteArray& data) {
-            m_serial.sendData(data);
+            m_commManager->sendData(data);
         });
 
     connect(m_dataParser, &DataParser::newReceivedData,
         m_commandViewModel, &CommandViewModel::handleReceivedData);
 
-    refreshPortList();
+    m_commManager->setCurrentType("serial");
 }
 
 CommViewModel::~CommViewModel()
 {
     qDebug() << "=== CommViewModel destructor START ===";
-    m_serial.closePort();
+    m_commManager->closePort();
     qDebug() << "=== CommViewModel destructor END ===";
-}
-
-QString CommViewModel::getPortName() const
-{
-    return m_portName;
-}
-
-void CommViewModel::setPortName(const QString& name)
-{
-    if (m_portName != name) {
-        m_portName = name;
-        emit portNameChanged(m_portName);
-    }
-}
-
-int CommViewModel::getBaudRate() const
-{
-    return m_baudRate;
-}
-
-void CommViewModel::setBaudRate(int baudRate)
-{
-    if (m_baudRate != baudRate) {
-        m_baudRate = baudRate;
-        emit baudRateChanged(m_baudRate);
-    }
-}
-
-int CommViewModel::getDataBits() const
-{
-    return m_dataBits;
-}
-
-void CommViewModel::setDataBits(int dataBits)
-{
-    if (m_dataBits != dataBits) {
-        m_dataBits = dataBits;
-        emit dataBitsChanged(m_dataBits);
-    }
-}
-
-int CommViewModel::getParity() const
-{
-    return m_parity;
-}
-
-void CommViewModel::setParity(int parity)
-{
-    if (m_parity != parity) {
-        m_parity = parity;
-        emit parityChanged(m_parity);
-    }
-}
-
-int CommViewModel::getStopBits() const
-{
-    return m_stopBits;
-}
-
-void CommViewModel::setStopBits(int stopBits)
-{
-    if (m_stopBits != stopBits) {
-        m_stopBits = stopBits;
-        emit stopBitsChanged(m_stopBits);
-    }
-}
-
-int CommViewModel::getFlowControl() const
-{
-    return m_flowControl;
-}
-
-void CommViewModel::setFlowControl(int flowControl)
-{
-    if (m_flowControl != flowControl) {
-        m_flowControl = flowControl;
-        emit flowControlChanged(m_flowControl);
-    }
 }
 
 int CommViewModel::getConnectState() const
 {
-    return static_cast<int>(m_serial.getConnectState());
+    return m_commManager->getConnectState();
 }
 
 QString CommViewModel::getReceiveData() const
@@ -156,11 +82,6 @@ QString CommViewModel::getReceiveData() const
 QString CommViewModel::getSendHistory() const
 {
     return m_sendHistory;
-}
-
-QStringList CommViewModel::getPortList() const
-{
-    return m_portList;
 }
 
 bool CommViewModel::getHexDisplay() const
@@ -212,6 +133,9 @@ void CommViewModel::setIsPlotViewActive(bool active)
     if (m_isPlotViewActive != active) {
         m_isPlotViewActive = active;
         emit isPlotViewActiveChanged(m_isPlotViewActive);
+        if (m_dataPlotViewModel) {
+            m_dataPlotViewModel->setViewActive(active);
+        }
     }
 }
 
@@ -241,32 +165,9 @@ CommandViewModel* CommViewModel::getCommandViewModel() const
     return m_commandViewModel;
 }
 
-void CommViewModel::openSerialPort(const QString& portName, int baudRate, int dataBits, int parity, int stopBits, int flowControl)
+CommManager* CommViewModel::getCommManager() const
 {
-    qDebug() << "=== CommViewModel::openSerialPort START ===";
-    qDebug() << "  Port:" << portName;
-    qDebug() << "  BaudRate:" << baudRate;
-
-    // 设置串口参数
-    m_serial.setPortName(portName);
-    m_serial.setBaudRate(baudRateFromInt(baudRate));
-    m_serial.setSerialParams(dataBitsFromInt(dataBits),
-                             parityFromInt(parity),
-                             stopBitsFromInt(stopBits),
-                             flowControlFromInt(flowControl));
-
-    // 打开串口
-    bool ret = m_serial.openPort();
-
-    qDebug() << "  openPort returned:" << ret;
-    qDebug() << "=== CommViewModel::openSerialPort END ===";
-}
-
-void CommViewModel::closeSerialPort()
-{
-    qDebug() << "=== CommViewModel::closeSerialPort START ===";
-    m_serial.closePort();
-    qDebug() << "=== CommViewModel::closeSerialPort END ===";
+    return m_commManager;
 }
 
 void CommViewModel::sendData(const QString& data)
@@ -287,9 +188,9 @@ void CommViewModel::sendData(const QString& data)
     qDebug() << "  Data to send size:" << sendData.size();
     qDebug() << "  Data to send (hex):" << byteArrayToHexString(sendData);
 
-    qDebug() << "  Calling m_serial.sendData()...";
-    bool ret = m_serial.sendData(sendData);
-    qDebug() << "  m_serial.sendData() returned:" << ret;
+    qDebug() << "  Calling m_commManager->sendData()...";
+    bool ret = m_commManager->sendData(sendData);
+    qDebug() << "  m_commManager->sendData() returned:" << ret;
 
     if (ret) {
         QString displayData = m_hexSend ? byteArrayToHexString(sendData) : data;
@@ -302,12 +203,6 @@ void CommViewModel::sendData(const QString& data)
     }
 
     qDebug() << "=== CommViewModel::sendData END ===";
-}
-
-void CommViewModel::refreshPortList()
-{
-    m_portList = m_serial.getAvailablePortList();
-    emit portListChanged(m_portList);
 }
 
 void CommViewModel::clearReceiveData()
@@ -324,19 +219,23 @@ void CommViewModel::clearSendHistory()
     emit sendHistoryChanged(m_sendHistory);
 }
 
-void CommViewModel::onStateChanged(CommConnectState state)
+void CommViewModel::onStateChanged(int state)
 {
     qDebug() << "=== CommViewModel::onStateChanged START ===";
-    qDebug() << "  New state:" << static_cast<int>(state);
+    qDebug() << "  New state:" << state;
     qDebug() << "  Old state:" << m_connectState;
 
-    m_connectState = static_cast<int>(state);
+    m_connectState = state;
     emit connectStateChanged(m_connectState);
     qDebug() << "=== CommViewModel::onStateChanged END ===";
 }
 
 void CommViewModel::onRecvData(const QByteArray& data)
 {
+    qDebug() << "[CommViewModel] onRecvData, size:" << data.size() 
+             << ", hex:" << data.toHex().left(32)
+             << ", parseEnabled:" << m_parseEnabled;
+
     if (m_isShowViewActive) {
         QString displayData;
         if (m_hexDisplay) {
@@ -471,65 +370,4 @@ QByteArray CommViewModel::hexStringToByteArray(const QString& hex) const
         }
     }
     return data;
-}
-
-SerialBaudRate CommViewModel::baudRateFromInt(int baud) const
-{
-    switch (baud) {
-    case 1200: return SerialBaudRate::BR_1200;
-    case 2400: return SerialBaudRate::BR_2400;
-    case 4800: return SerialBaudRate::BR_4800;
-    case 9600: return SerialBaudRate::BR_9600;
-    case 19200: return SerialBaudRate::BR_19200;
-    case 38400: return SerialBaudRate::BR_38400;
-    case 57600: return SerialBaudRate::BR_57600;
-    case 115200: return SerialBaudRate::BR_115200;
-    case 230400: return SerialBaudRate::BR_230400;
-    case 460800: return SerialBaudRate::BR_460800;
-    case 921600: return SerialBaudRate::BR_921600;
-    default: return SerialBaudRate::BR_9600;
-    }
-}
-
-SerialDataBits CommViewModel::dataBitsFromInt(int bits) const
-{
-    switch (bits) {
-    case 5: return SerialDataBits::D5;
-    case 6: return SerialDataBits::D6;
-    case 7: return SerialDataBits::D7;
-    case 8: return SerialDataBits::D8;
-    default: return SerialDataBits::D8;
-    }
-}
-
-SerialParity CommViewModel::parityFromInt(int index) const
-{
-    switch (index) {
-    case 0: return SerialParity::None;
-    case 1: return SerialParity::Odd;
-    case 2: return SerialParity::Even;
-    case 3: return SerialParity::Mark;
-    case 4: return SerialParity::Space;
-    default: return SerialParity::None;
-    }
-}
-
-SerialStopBits CommViewModel::stopBitsFromInt(int index) const
-{
-    switch (index) {
-    case 0: return SerialStopBits::S1;
-    case 1: return SerialStopBits::S1_5;
-    case 2: return SerialStopBits::S2;
-    default: return SerialStopBits::S1;
-    }
-}
-
-SerialFlowControl CommViewModel::flowControlFromInt(int index) const
-{
-    switch (index) {
-    case 0: return SerialFlowControl::None;
-    case 1: return SerialFlowControl::RTS_CTS;
-    case 2: return SerialFlowControl::XON_XOFF;
-    default: return SerialFlowControl::None;
-    }
 }

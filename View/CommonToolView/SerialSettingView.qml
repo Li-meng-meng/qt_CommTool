@@ -69,7 +69,10 @@ Rectangle {
                     color: refreshBtn.pressed ? Theme.ColorTheme.btnPrimaryPressed : Theme.ColorTheme.btnPrimary
                     radius: 4 
                 }
-                onClicked: root.refreshPorts()
+                onClicked: {
+                    console.log("[SerialSettingView] refreshPorts clicked, portList count:", root.portList.length)
+                    root.refreshPorts()
+                }
             }
 
             Label {

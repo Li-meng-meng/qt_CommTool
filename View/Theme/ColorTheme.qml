@@ -4,6 +4,9 @@ pragma Singleton
 QtObject {
     property bool isDark: false
 
+    // ========== 基础颜色 ==========
+    property color transparent: "transparent"
+
     // ========== 亮色主题 (Light) ==========
     property color light_bgMain:           "#FFFFFF"
     property color light_border:           "#E5E7EB"
@@ -30,6 +33,10 @@ QtObject {
     property color light_btnSuccessHover:  "#15803D"
     property color light_btnSuccessPressed:"#166534"
     property color light_btnSuccessText:   "#FFFFFF"
+    property color light_btnWarning:       "#F59E0B"
+    property color light_btnWarningHover:  "#D97706"
+    property color light_btnWarningPressed:"#B45309"
+    property color light_btnWarningText:   "#FFFFFF"
     property color light_toastSuccess:     "#16A34A"
     property color light_toastError:       "#DC2626"
     property color light_toastInfo:        "#1E293B"
@@ -61,6 +68,10 @@ QtObject {
     property color dark_btnSuccessHover:   "#4ADE80"
     property color dark_btnSuccessPressed: "#16A34A"
     property color dark_btnSuccessText:    "#FFFFFF"
+    property color dark_btnWarning:        "#FBBF24"
+    property color dark_btnWarningHover:   "#F59E0B"
+    property color dark_btnWarningPressed: "#D97706"
+    property color dark_btnWarningText:    "#1E293B"
     property color dark_toastSuccess:      "#16A34A"
     property color dark_toastError:        "#DC2626"
     property color dark_toastInfo:         "#1E293B"
@@ -92,6 +103,10 @@ QtObject {
     property color btnSuccessHover:  isDark ? dark_btnSuccessHover : light_btnSuccessHover
     property color btnSuccessPressed:isDark ? dark_btnSuccessPressed : light_btnSuccessPressed
     property color btnSuccessText:   isDark ? dark_btnSuccessText : light_btnSuccessText
+    property color btnWarning:       isDark ? dark_btnWarning : light_btnWarning
+    property color btnWarningHover:  isDark ? dark_btnWarningHover : light_btnWarningHover
+    property color btnWarningPressed:isDark ? dark_btnWarningPressed : light_btnWarningPressed
+    property color btnWarningText:   isDark ? dark_btnWarningText : light_btnWarningText
     property color toastSuccess:     isDark ? dark_toastSuccess : light_toastSuccess
     property color toastError:       isDark ? dark_toastError : light_toastError
     property color toastInfo:        isDark ? dark_toastInfo : light_toastInfo

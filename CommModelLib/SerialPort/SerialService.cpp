@@ -222,6 +222,8 @@ bool SerialService::openPort()
 void SerialService::onReadyRead()
 {
     QByteArray data = m_serialPort.readAll();
+    qDebug() << "[SerialService] onReadyRead, read size:" << data.size()
+             << ", hex:" << data.toHex().left(32);
     if (!data.isEmpty()) {
         emit sigRecvData(data);
     }

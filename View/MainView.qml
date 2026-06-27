@@ -67,6 +67,16 @@ Window {
             }
             onSwitchToSerial: {
                 root.currentPage = 0
+                settingView.currentCommType = "serial"
+                commViewModel.commManager.setCurrentType("serial")
+                commViewModel.isPlotViewActive = false
+                commViewModel.dataPlotViewModel.isViewActive = false
+                commViewModel.isShowViewActive = true
+            }
+            onSwitchToBluetooth: {
+                root.currentPage = 0
+                settingView.currentCommType = "bluetooth"
+                commViewModel.commManager.setCurrentType("bluetooth")
                 commViewModel.isPlotViewActive = false
                 commViewModel.dataPlotViewModel.isViewActive = false
                 commViewModel.isShowViewActive = true
@@ -94,25 +104,29 @@ Window {
                         id: settingView
                         height: 300
 
-                        portName: commViewModel.portName
-                        baudRate: commViewModel.baudRate
-                        portList: commViewModel.portList
+                        portList: commViewModel.commManager.deviceList
+                        bluetoothDeviceList: commViewModel.commManager.deviceList
+                        isScanning: commViewModel.commManager.isScanning
                         connectState: commViewModel.connectState
-                        dataBits: commViewModel.dataBits
-                        parity: commViewModel.parity
-                        stopBits: commViewModel.stopBits
-                        flowControl: commViewModel.flowControl
 
-                        onOpenPort: commViewModel.openSerialPort(portName, baudRate, dataBits, parity, stopBits, flowControl)
-                        onClosePort: commViewModel.closeSerialPort()
-                        onRefreshPorts: commViewModel.refreshPortList()
-
-                        onPortNameChanged: commViewModel.portName = portName
-                        onBaudRateChanged: commViewModel.baudRate = baudRate
-                        onDataBitsChanged: commViewModel.dataBits = dataBits
-                        onParityChanged: commViewModel.parity = parity
-                        onStopBitsChanged: commViewModel.stopBits = stopBits
-                        onFlowControlChanged: commViewModel.flowControl = flowControl
+                        onOpenPort: commViewModel.commManager.openPort({
+                            "portName": portName,
+                            "baudRate": baudRate,
+                            "dataBits": dataBits,
+                            "parity": parity,
+                            "stopBits": stopBits,
+                            "flowControl": flowControl
+                        })
+                        onOpenBluetoothPort: commViewModel.commManager.openPort({
+                            "deviceAddress": deviceAddress,
+                            "serviceUuid": serviceUuid,
+                            "writeCharUuid": writeCharUuid,
+                            "notifyCharUuid": notifyCharUuid
+                        })
+                        onClosePort: commViewModel.commManager.closePort()
+                        onRefreshPorts: commViewModel.commManager.refreshDevices()
+                        onStartScan: commViewModel.commManager.startScan()
+                        onStopScan: commViewModel.commManager.stopScan()
                     }
 
                     DataShowView {

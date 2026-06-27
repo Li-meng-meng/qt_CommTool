@@ -20,6 +20,8 @@ DataParser::~DataParser()
 
 void DataParser::parse(const QByteArray& rawData)
 {
+    qDebug() << "[DataParser] parse called, size:" << rawData.size() 
+             << ", hex:" << rawData.toHex().left(32);
     m_commImpl->enqueue(rawData);
 }
 
