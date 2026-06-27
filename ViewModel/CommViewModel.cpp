@@ -334,7 +334,7 @@ void CommViewModel::onNewAllData(const AllDataPacket& data)
             data.Acceleration[0], data.Acceleration[1], data.Acceleration[2],
             data.AngularVelocity[0], data.AngularVelocity[1], data.AngularVelocity[2],
             data.EulerAngles[0], data.EulerAngles[1], data.EulerAngles[2],
-            0, 0, 0);
+            data.Magnetometer[0], data.Magnetometer[1], data.Magnetometer[2]);
     }
 }
 
