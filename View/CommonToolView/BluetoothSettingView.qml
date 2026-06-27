@@ -9,6 +9,7 @@ Rectangle {
     height: parent.height
     color: Theme.ColorTheme.bgMain
 
+    property real globalMargin: 16
     property real layoutSpacing: 12
     property real gridCellSpacing: 10
     property real labelMinWidth: 72
@@ -17,10 +18,7 @@ Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 32
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.bottomMargin: 16
+        anchors.margins: globalMargin
         spacing: layoutSpacing
 
         // 设备列表
@@ -41,6 +39,7 @@ Rectangle {
                 id: deviceCombo
                 Layout.fillWidth: true
                 model: root.deviceList
+                Layout.minimumWidth: 200
                 currentIndex: root.deviceList.length > 0 ? 0 : -1
                 onActivated: {
                     if (currentIndex >= 0 && currentIndex < root.deviceList.length) {

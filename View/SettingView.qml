@@ -34,35 +34,38 @@ Rectangle {
                 font.pointSize: 12
             }
         }
-
-        SerialSettingView {
-            id: serialSetting
+        Rectangle{
             Layout.fillWidth: true
             Layout.fillHeight: true
-            visible: root.currentCommType === "serial"
+            SerialSettingView {
+                id: serialSetting
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                visible: root.currentCommType === "serial"
 
-            portList: root.portList
-            connectState: root.connectState
+                portList: root.portList
+                connectState: root.connectState
 
-            onOpenPort: root.openPort(portName, baudRate, dataBits, parity, stopBits, flowControl)
-            onClosePort: root.closePort()
-            onRefreshPorts: root.refreshPorts()
-        }
+                onOpenPort: root.openPort(portName, baudRate, dataBits, parity, stopBits, flowControl)
+                onClosePort: root.closePort()
+                onRefreshPorts: root.refreshPorts()
+            }
 
-        BluetoothSettingView {
-            id: bluetoothSetting
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: root.currentCommType === "bluetooth"
+            BluetoothSettingView {
+                id: bluetoothSetting
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                visible: root.currentCommType === "bluetooth"
 
-            deviceList: root.bluetoothDeviceList
-            isScanning: root.isScanning
-            connectState: root.connectState
+                deviceList: root.bluetoothDeviceList
+                isScanning: root.isScanning
+                connectState: root.connectState
 
-            onStartScan: root.startScan()
-            onStopScan: root.stopScan()
-            onOpenPort: root.openBluetoothPort(deviceAddress, serviceUuid, writeCharUuid, notifyCharUuid)
-            onClosePort: root.closePort()
+                onStartScan: root.startScan()
+                onStopScan: root.stopScan()
+                onOpenPort: root.openBluetoothPort(deviceAddress, serviceUuid, writeCharUuid, notifyCharUuid)
+                onClosePort: root.closePort()
+            }
         }
     }
 
